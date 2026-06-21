@@ -1371,7 +1371,7 @@ canvas {
 
 @media (max-width: 760px) {
   .page-shell {
-    width: min(100% - 20px, 100%);
+    width: min(100% - 8px, 100%);
     padding-top: 18px;
   }
 
@@ -1393,6 +1393,12 @@ canvas {
   .panel,
   .preview {
     border-radius: 24px;
+  }
+
+  .preview {
+    width: calc(100% + 8px);
+    margin-inline: -4px;
+    padding: 12px 8px 10px;
   }
 
   .field-grid,
@@ -1465,9 +1471,21 @@ canvas {
   .preview-adjust-toolbar {
     justify-content: flex-start;
     flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
   }
 
   .preview-frame {
-    padding: 14px;
+    margin-top: 12px;
+    padding: 6px;
+  }
+
+  .preview-frame::before {
+    inset: 6px;
+    border-radius: 14px;
+  }
+
+  canvas {
+    border-radius: 14px;
   }
 }
