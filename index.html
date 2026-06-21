@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>自己紹介フォーマット選択</title>
-  <link rel="stylesheet" href="./hub.css?v=20260621b">
+  <link rel="stylesheet" href="./hub.css?v=20260621c">
 </head>
 <body class="hub-page">
   <div class="hub-shell">
@@ -33,34 +33,104 @@
 
       <form id="commonProfileForm" class="common-profile-form">
         <div class="common-profile-grid">
-          <label class="common-field">
-            <span>名前・HN・通名</span>
+          <div class="common-field">
+            <div class="common-label-row">
+              <select id="displayNameVisible" name="displayNameVisible" class="common-select common-visibility-select" aria-label="名前の表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="displayNameLabel" name="displayNameLabel" class="common-select" aria-label="名前のプレビュー表示ラベル">
+                <option value="名前">名前</option>
+                <option value="HN">HN</option>
+                <option value="通名">通名</option>
+              </select>
+            </div>
             <input id="displayName" name="displayName" type="text" maxlength="40" placeholder="みなと / @minato_create">
-          </label>
-          <label class="common-field">
-            <span>肩書き</span>
+          </div>
+          <div class="common-field">
+            <div class="common-label-row">
+              <select id="roleVisible" name="roleVisible" class="common-select common-visibility-select" aria-label="肩書きの表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="roleLabel" name="roleLabel" class="common-select" aria-label="肩書きのプレビュー表示ラベル">
+                <option value="肩書き">肩書き</option>
+                <option value="称号">称号</option>
+                <option value="職業">職業</option>
+                <option value="ランク">ランク</option>
+              </select>
+            </div>
             <input id="role" name="role" type="text" maxlength="48" placeholder="やさしい配色が好きなWebデザイナー">
-          </label>
-          <label class="common-field">
-            <span>性・♂♀・gender</span>
+          </div>
+          <div class="common-field">
+            <div class="common-label-row">
+              <select id="genderVisible" name="genderVisible" class="common-select common-visibility-select" aria-label="性の表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="genderLabel" name="genderLabel" class="common-select" aria-label="性のプレビュー表示ラベル">
+                <option value="性">性</option>
+                <option value="属性">属性</option>
+                <option value="♂♀">♂♀</option>
+                <option value="gender">gender</option>
+              </select>
+            </div>
             <input id="gender" name="gender" type="text" maxlength="24" placeholder="♀ / ♂ / nonbinary">
-          </label>
-          <label class="common-field">
-            <span>血液型・血の種類</span>
+          </div>
+          <div class="common-field">
+            <div class="common-label-row">
+              <select id="bloodVisible" name="bloodVisible" class="common-select common-visibility-select" aria-label="血液型の表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="bloodLabel" name="bloodLabel" class="common-select" aria-label="血液型のプレビュー表示ラベル">
+                <option value="血液型">血液型</option>
+                <option value="血の種類">血の種類</option>
+              </select>
+            </div>
             <input id="blood" name="blood" type="text" maxlength="24" placeholder="A型 / AB型 / ひみつ">
-          </label>
-          <label class="common-field">
-            <span>誕生日・記念日</span>
+          </div>
+          <div class="common-field">
+            <div class="common-label-row">
+              <select id="birthdayVisible" name="birthdayVisible" class="common-select common-visibility-select" aria-label="誕生日の表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="birthdayLabel" name="birthdayLabel" class="common-select" aria-label="誕生日のプレビュー表示ラベル">
+                <option value="誕生日">誕生日</option>
+                <option value="記念日">記念日</option>
+              </select>
+            </div>
             <input id="birthday" name="birthday" type="text" maxlength="24" placeholder="4月18日 / 記念日">
-          </label>
-          <label class="common-field">
-            <span>年齢・世代</span>
+          </div>
+          <div class="common-field">
+            <div class="common-label-row">
+              <select id="ageVisible" name="ageVisible" class="common-select common-visibility-select" aria-label="年齢の表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="ageLabel" name="ageLabel" class="common-select" aria-label="年齢のプレビュー表示ラベル">
+                <option value="年齢">年齢</option>
+                <option value="世代">世代</option>
+              </select>
+            </div>
             <input id="age" name="age" type="text" maxlength="24" placeholder="20代 / Z世代">
-          </label>
-          <label class="common-field common-field-full">
-            <span>住んでる所・出身地・生息地・出没場所</span>
+          </div>
+          <div class="common-field common-field-full">
+            <div class="common-label-row">
+              <select id="locationVisible" name="locationVisible" class="common-select common-visibility-select" aria-label="住んでる所の表示設定">
+                <option value="show">表示</option>
+                <option value="hide">非表示</option>
+              </select>
+              <select id="locationLabel" name="locationLabel" class="common-select" aria-label="住んでる所のプレビュー表示ラベル">
+                <option value="住んでる所">住んでる所</option>
+                <option value="出身地">出身地</option>
+                <option value="生息地">生息地</option>
+                <option value="出没場所">出没場所</option>
+              </select>
+            </div>
             <input id="location" name="location" type="text" maxlength="40" placeholder="東京 / 出身地 / よくいる場所">
-          </label>
+          </div>
         </div>
 
         <label class="common-field">
@@ -131,7 +201,7 @@
     </main>
 
   </div>
-  <script src="./common-profile.js?v=20260621e"></script>
-  <script src="./hub.js?v=20260621d"></script>
+  <script src="./common-profile.js?v=20260621f"></script>
+  <script src="./hub.js?v=20260621e"></script>
 </body>
 </html>

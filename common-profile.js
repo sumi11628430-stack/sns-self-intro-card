@@ -1,11 +1,45 @@
 const COMMON_PROFILE_STORAGE_KEY = "sns-common-profile-state";
+const COMMON_PROFILE_DEFAULT_SELECT_FIELDS = {
+  displayNameVisible: "show",
+  displayNameLabel: "名前",
+  roleVisible: "show",
+  roleLabel: "肩書き",
+  genderVisible: "show",
+  genderLabel: "性",
+  bloodVisible: "show",
+  bloodLabel: "血液型",
+  birthdayVisible: "show",
+  birthdayLabel: "誕生日",
+  ageVisible: "show",
+  ageLabel: "年齢",
+  locationVisible: "show",
+  locationLabel: "住んでる所",
+  socialXLabel: "X",
+  socialInstagramLabel: "Instagram",
+  socialThreadsLabel: "Threads",
+  socialTikTokLabel: "TikTok"
+};
 const COMMON_PROFILE_FIELDS = [
+  "displayNameVisible",
+  "displayNameLabel",
   "displayName",
+  "roleVisible",
+  "roleLabel",
   "role",
+  "genderVisible",
+  "genderLabel",
   "gender",
+  "bloodVisible",
+  "bloodLabel",
   "blood",
+  "birthdayVisible",
+  "birthdayLabel",
   "birthday",
+  "ageVisible",
+  "ageLabel",
   "age",
+  "locationVisible",
+  "locationLabel",
   "location",
   "intro",
   "tags",
@@ -33,7 +67,9 @@ const COMMON_PROFILE_LEGACY_SOCIAL_FIELDS = [
 ];
 
 function createEmptyCommonProfile() {
-  const profile = Object.fromEntries(COMMON_PROFILE_FIELDS.map((fieldName) => [fieldName, ""]));
+  const profile = Object.fromEntries(
+    COMMON_PROFILE_FIELDS.map((fieldName) => [fieldName, COMMON_PROFILE_DEFAULT_SELECT_FIELDS[fieldName] || ""])
+  );
   COMMON_PROFILE_SOCIAL_FIELDS.forEach((field) => {
     profile[field.labelKey] = field.defaultLabel;
   });
@@ -75,7 +111,12 @@ function normalizeCommonProfile(value) {
 
   COMMON_PROFILE_FIELDS.forEach((fieldName) => {
     const fieldValue = value[fieldName];
-    normalized[fieldName] = fieldValue == null ? "" : String(fieldValue);
+    const nextValue = fieldValue == null ? "" : String(fieldValue);
+    if (Object.prototype.hasOwnProperty.call(COMMON_PROFILE_DEFAULT_SELECT_FIELDS, fieldName)) {
+      normalized[fieldName] = nextValue.trim() || COMMON_PROFILE_DEFAULT_SELECT_FIELDS[fieldName];
+      return;
+    }
+    normalized[fieldName] = nextValue;
   });
 
   COMMON_PROFILE_SOCIAL_FIELDS.forEach((field) => {
