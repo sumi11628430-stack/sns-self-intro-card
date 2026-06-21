@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>自己紹介フォーマット選択</title>
+  <link rel="stylesheet" href="./hub.css?v=20260621b">
+</head>
+<body class="hub-page">
+  <div class="hub-shell">
+    <header class="hub-hero">
+      <p class="eyebrow">PROFILE FORMAT HUB</p>
+      <h1>自己紹介なので自由に作りたい<br>プロフカード</h1>
+      <p class="lead">
+        先に使いたいフォーマットを選んでから、それぞれのページへ進めます。
+        各ページの中で、SNS用カードと印刷して使える名刺を分けて作れる形へ整理していきます。
+      </p>
+    </header>
+
+    <section class="common-profile-card">
+      <div class="common-profile-header">
+        <p class="eyebrow">COMMON PROFILE</p>
+        <h2>基本情報</h2>
+        <p>
+          トップページでも、名前からLINEまでの基本情報をまとめて入れられるようにしています。
+          まずはここで共通の内容を整理してから、使いたいフォーマットへ進めます。
+        </p>
+      </div>
+
+      <div class="common-profile-actions">
+        <button type="button" class="primary-link" id="loadCommonProfileSample">入力例を入れる</button>
+      </div>
+
+      <form id="commonProfileForm" class="common-profile-form">
+        <div class="common-profile-grid">
+          <label class="common-field">
+            <span>名前・HN・通名</span>
+            <input id="displayName" name="displayName" type="text" maxlength="40" placeholder="みなと / @minato_create">
+          </label>
+          <label class="common-field">
+            <span>肩書き</span>
+            <input id="role" name="role" type="text" maxlength="48" placeholder="やさしい配色が好きなWebデザイナー">
+          </label>
+          <label class="common-field">
+            <span>性・♂♀・gender</span>
+            <input id="gender" name="gender" type="text" maxlength="24" placeholder="♀ / ♂ / nonbinary">
+          </label>
+          <label class="common-field">
+            <span>血液型・血の種類</span>
+            <input id="blood" name="blood" type="text" maxlength="24" placeholder="A型 / AB型 / ひみつ">
+          </label>
+          <label class="common-field">
+            <span>誕生日・記念日</span>
+            <input id="birthday" name="birthday" type="text" maxlength="24" placeholder="4月18日 / 記念日">
+          </label>
+          <label class="common-field">
+            <span>年齢・世代</span>
+            <input id="age" name="age" type="text" maxlength="24" placeholder="20代 / Z世代">
+          </label>
+          <label class="common-field common-field-full">
+            <span>住んでる所・出身地・生息地・出没場所</span>
+            <input id="location" name="location" type="text" maxlength="40" placeholder="東京 / 出身地 / よくいる場所">
+          </label>
+        </div>
+
+        <label class="common-field">
+          <span>自己紹介</span>
+          <textarea id="intro" name="intro" rows="4" maxlength="180" placeholder="共通で使いたい自己紹介文を短めに入れておくと、あとで整理しやすいです。"></textarea>
+        </label>
+
+        <label class="common-field">
+          <span>タグ</span>
+          <input id="tags" name="tags" type="text" maxlength="120" placeholder="デザイン, 読書, ゆっくり返信">
+        </label>
+
+        <div class="common-social-section">
+          <h3>SNSリンク</h3>
+          <div class="common-social-grid">
+            <label class="common-field common-inline-field">
+              <span>表示名</span>
+              <input id="socialXLabel" name="socialXLabel" type="text" maxlength="20" placeholder="X / BOOTH / ブログ">
+              <input id="socialX" name="socialX" type="url" maxlength="160" placeholder="https://example.com/your_link">
+            </label>
+            <label class="common-field common-inline-field">
+              <span>表示名</span>
+              <input id="socialInstagramLabel" name="socialInstagramLabel" type="text" maxlength="20" placeholder="Instagram / 通販 / サイト">
+              <input id="socialInstagram" name="socialInstagram" type="url" maxlength="160" placeholder="https://example.com/your_link">
+            </label>
+            <label class="common-field common-inline-field">
+              <span>表示名</span>
+              <input id="socialThreadsLabel" name="socialThreadsLabel" type="text" maxlength="20" placeholder="Threads / Lit.Link / ブログ">
+              <input id="socialThreads" name="socialThreads" type="url" maxlength="160" placeholder="https://example.com/your_link">
+            </label>
+            <label class="common-field common-inline-field">
+              <span>表示名</span>
+              <input id="socialTikTokLabel" name="socialTikTokLabel" type="text" maxlength="20" placeholder="TikTok / YouTube / 公式">
+              <input id="socialTikTok" name="socialTikTok" type="url" maxlength="160" placeholder="https://example.com/your_link">
+            </label>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <main class="format-grid">
+      <a class="format-card daily-card" href="./daily-format.html">
+        <span class="status-badge">公開中</span>
+        <h2>日常用自己紹介フォーマット</h2>
+        <p>
+          普段のSNSで使いやすい自己紹介カードを、色・項目・表示内容まで自由にカスタマイズできます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+
+      <a class="format-card medical-card" href="./medical-format.html">
+        <span class="status-badge">公開中</span>
+        <h2>闘病用自己紹介フォーマット</h2>
+        <p>
+          闘病中の自己紹介に合わせた専用フォーマットです。配慮事項やチェックリストも含めて、必要な情報をやさしく整理できます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+
+      <a class="format-card oshi-card" href="./oshi-format.html">
+        <span class="status-badge oshi-badge">公開中</span>
+        <h2>推し活用自己紹介フォーマット</h2>
+        <p>
+          推し、推し歴、同担スタンス、交流方針などをまとめて、推し活仲間に伝えやすい形へ整えられます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+    </main>
+
+  </div>
+  <script src="./common-profile.js?v=20260621e"></script>
+  <script src="./hub.js?v=20260621d"></script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>日常用自己紹介フォーマット</title>
+  <link rel="stylesheet" href="./style.css?v=20260621e">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <p class="eyebrow">DAILY PROFILE FORMAT</p>
+      <h1>自分らしい<br>自己紹介カードを、<br>すぐ作ってすぐ使う。</h1>
+      <p class="lead">
+        名前・HN・通名、肩書き、自己紹介、タグ、基本情報、自由項目、配色、背景を調整すると、
+        右側のプレビューがその場で更新されます。完成したら画像で保存して、そのままSNSに使えます。
+      </p>
+      <div class="mode-switch" aria-label="作成モード">
+        <a class="mode-link is-active" href="./daily-format.html" aria-current="page">SNS用カードを作る</a>
+        <a class="mode-link" href="./daily-print.html">印刷して使える名刺を作る</a>
+      </div>
+      <p class="mode-note">このページはSNS投稿向けのカード作成ページです。コンビニで両面印刷して使う名刺は、別ページで表裏を分けて作る想定にします。</p>
+      <div class="hero-actions">
+        <button type="button" class="ghost" onclick="location.href='./index.html'">↩ トップへ戻る</button>
+        <button type="button" class="primary" id="loadSample">入力例を入れる</button>
+        <button type="button" class="ghost" id="downloadCard">画像で保存</button>
+        <button type="button" class="ghost" id="shareCard">共有</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="editor">
+        <form id="cardForm">
+          <section class="panel">
+            <div class="panel-header panel-header-with-sync">
+              <div class="panel-header-copy">
+                <h2>基本情報</h2>
+                <p>カードの主役になるプロフィールです。</p>
+              </div>
+              <label class="common-sync-inline">
+                <input id="useCommonProfile" name="useCommonProfile" type="checkbox">
+                <span>トップページの基本情報を反映させる</span>
+              </label>
+            </div>
+            <div class="field">
+              <div class="label-row">
+                <select id="displayNameVisible" name="displayNameVisible" class="label-select visibility-select" aria-label="名前の表示設定">
+                  <option value="show">表示</option>
+                  <option value="hide">非表示</option>
+                </select>
+                <select id="displayNameLabel" name="displayNameLabel" class="label-select" aria-label="名前のプレビュー表示ラベル">
+                  <option value="名前">名前</option>
+                  <option value="HN">HN</option>
+                  <option value="通名">通名</option>
+                </select>
+              </div>
+              <input id="displayName" name="displayName" type="text" maxlength="40" placeholder="みなと / @minato_create">
+            </div>
+            <div class="field">
+              <div class="label-row">
+                <select id="roleVisible" name="roleVisible" class="label-select visibility-select" aria-label="肩書きの表示設定">
+                  <option value="show">表示</option>
+                  <option value="hide">非表示</option>
+                </select>
+                <select id="roleLabel" name="roleLabel" class="label-select" aria-label="肩書きのプレビュー表示ラベル">
+                  <option value="肩書き">肩書き</option>
+                  <option value="称号">称号</option>
+                  <option value="職業">職業</option>
+                  <option value="ランク">ランク</option>
+                </select>
+              </div>
+              <input id="role" name="role" type="text" maxlength="48" placeholder="やさしい配色が好きなWebデザイナー">
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="label-row">
+                  <select id="genderVisible" name="genderVisible" class="label-select visibility-select" aria-label="性の表示設定">
+                    <option value="show">表示</option>
+                    <option value="hide">非表示</option>
+                  </select>
+                  <select id="genderLabel" name="genderLabel" class="label-select" aria-label="性のプレビュー表示ラベル">
+                    <option value="性">性</option>
+                    <option value="属性">属性</option>
+                    <option value="♂♀">♂♀</option>
+                    <option value="gender">gender</option>
+                  </select>
+                </div>
+                <input id="gender" name="gender" type="text" maxlength="24" placeholder="♀ / ♂ / nonbinary">
+              </div>
+              <div class="field">
+                <div class="label-row">
+                  <select id="bloodVisible" name="bloodVisible" class="label-select visibility-select" aria-label="血液型の表示設定">
+                    <option value="show">表示</option>
+                    <option value="hide">非表示</option>
+                  </select>
+                  <select id="bloodLabel" name="bloodLabel" class="label-select" aria-label="血液型のプレビュー表示ラベル">
+                    <option value="血液型">血液型</option>
+                    <option value="血の種類">血の種類</option>
+                  </select>
+                </div>
+                <input id="blood" name="blood" type="text" maxlength="24" placeholder="A型 / AB型 / ひみつ">
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="label-row">
+                  <select id="birthdayVisible" name="birthdayVisible" class="label-select visibility-select" aria-label="誕生日の表示設定">
+                    <option value="show">表示</option>
+                    <option value="hide">非表示</option>
+                  </select>
+                  <select id="birthdayLabel" name="birthdayLabel" class="label-select" aria-label="誕生日のプレビュー表示ラベル">
+                    <option value="誕生日">誕生日</option>
+                    <option value="記念日">記念日</option>
+                  </select>
+                </div>
+                <input id="birthday" name="birthday" type="text" maxlength="24" placeholder="4月18日 / 記念日">
+              </div>
+              <div class="field">
+                <div class="label-row">
+                  <select id="ageVisible" name="ageVisible" class="label-select visibility-select" aria-label="年齢の表示設定">
+                    <option value="show">表示</option>
+                    <option value="hide">非表示</option>
+                  </select>
+                  <select id="ageLabel" name="ageLabel" class="label-select" aria-label="年齢のプレビュー表示ラベル">
+                    <option value="年齢">年齢</option>
+                    <option value="世代">世代</option>
+                  </select>
+                </div>
+                <input id="age" name="age" type="text" maxlength="24" placeholder="20代 / Z世代">
+              </div>
+            </div>
+            <div class="field">
+              <div class="label-row">
+                <select id="locationVisible" name="locationVisible" class="label-select visibility-select" aria-label="住んでる所の表示設定">
+                  <option value="show">表示</option>
+                  <option value="hide">非表示</option>
+                </select>
+                <select id="locationLabel" name="locationLabel" class="label-select" aria-label="住んでる所のプレビュー表示ラベル">
+                  <option value="住んでる所">住んでる所</option>
+                  <option value="出身地">出身地</option>
+                  <option value="生息地">生息地</option>
+                  <option value="出没場所">出没場所</option>
+                </select>
+              </div>
+              <input id="location" name="location" type="text" maxlength="40" placeholder="東京 / 出身地 / よくいる場所">
+            </div>
+            <label class="field">
+              <span>自己紹介</span>
+              <textarea id="intro" name="intro" rows="4" maxlength="180" placeholder="好きなことや気軽に話しかけてもらいたい内容を書いてみましょう。"></textarea>
+            </label>
+            <label class="field">
+              <span>タグ</span>
+              <input id="tags" name="tags" type="text" maxlength="120" placeholder="デザイン, カフェ巡り, 読書, 猫好き">
+            </label>
+            <div class="field">
+              <div class="panel-header compact">
+                <h2>SNSリンク</h2>
+                <p>入力したURLだけカード内に表示されます。プレビュー上のアイコンはクリックできます。</p>
+              </div>
+              <div class="social-input-grid">
+                <label class="field inline-field">
+                  <span>表示名</span>
+                  <input id="socialXLabel" name="socialXLabel" type="text" maxlength="20" placeholder="X / BOOTH / ブログ">
+                  <input id="socialX" name="socialX" type="url" maxlength="160" placeholder="https://example.com/your_link">
+                </label>
+                <label class="field inline-field">
+                  <span>表示名</span>
+                  <input id="socialInstagramLabel" name="socialInstagramLabel" type="text" maxlength="20" placeholder="Instagram / 通販 / サイト">
+                  <input id="socialInstagram" name="socialInstagram" type="url" maxlength="160" placeholder="https://example.com/your_link">
+                </label>
+                <label class="field inline-field">
+                  <span>表示名</span>
+                  <input id="socialThreadsLabel" name="socialThreadsLabel" type="text" maxlength="20" placeholder="Threads / Lit.Link / ブログ">
+                  <input id="socialThreads" name="socialThreads" type="url" maxlength="160" placeholder="https://example.com/your_link">
+                </label>
+                <label class="field inline-field">
+                  <span>表示名</span>
+                  <input id="socialTikTokLabel" name="socialTikTokLabel" type="text" maxlength="20" placeholder="TikTok / YouTube / 公式">
+                  <input id="socialTikTok" name="socialTikTok" type="url" maxlength="160" placeholder="https://example.com/your_link">
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>自由項目</h2>
+              <p>ラベルも内容も自由に変えられます。</p>
+            </div>
+            <div class="item-grid">
+              <div class="pair">
+                <label class="field">
+                  <span>項目1 ラベル</span>
+                  <input id="item1Label" name="item1Label" type="text" maxlength="18">
+                </label>
+                <label class="field">
+                  <span>項目1 内容</span>
+                  <input id="item1Value" name="item1Value" type="text" maxlength="50">
+                </label>
+              </div>
+              <div class="pair">
+                <label class="field">
+                  <span>項目2 ラベル</span>
+                  <input id="item2Label" name="item2Label" type="text" maxlength="18">
+                </label>
+                <label class="field">
+                  <span>項目2 内容</span>
+                  <input id="item2Value" name="item2Value" type="text" maxlength="50">
+                </label>
+              </div>
+              <div class="pair">
+                <label class="field">
+                  <span>項目3 ラベル</span>
+                  <input id="item3Label" name="item3Label" type="text" maxlength="18">
+                </label>
+                <label class="field">
+                  <span>項目3 内容</span>
+                  <input id="item3Value" name="item3Value" type="text" maxlength="50">
+                </label>
+              </div>
+              <div class="pair">
+                <label class="field">
+                  <span>項目4 ラベル</span>
+                  <input id="item4Label" name="item4Label" type="text" maxlength="18">
+                </label>
+                <label class="field">
+                  <span>項目4 内容</span>
+                  <input id="item4Value" name="item4Value" type="text" maxlength="50">
+                </label>
+              </div>
+            </div>
+            <label class="field">
+              <span>フッターメッセージ</span>
+              <input id="footerMessage" name="footerMessage" type="text" maxlength="64" placeholder="気軽に仲良くしてください">
+            </label>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>デザイン</h2>
+              <p>SNS用カードとして使いやすいサイズ、背景、色味を調整できます。</p>
+            </div>
+            <div class="field-grid">
+              <label class="field">
+                <span>通常カードサイズ</span>
+                <select id="sizePreset" name="sizePreset">
+                  <option value="portrait">縦長 1080 x 1350</option>
+                  <option value="square">正方形 1080 x 1080</option>
+                  <option value="story">ストーリー 1080 x 1920</option>
+                </select>
+                <p class="field-note" id="sizePresetNote">通常カードではサイズを自由に選べます。</p>
+              </label>
+              <label class="field">
+                <span>アバター形状</span>
+                <select id="avatarShape" name="avatarShape">
+                  <option value="circle">円形</option>
+                  <option value="rounded">角丸</option>
+                  <option value="blob">ふんわり</option>
+                </select>
+              </label>
+            </div>
+            <div class="field-grid">
+              <label class="field">
+                <span>背景テーマ</span>
+                <select id="themePreset" name="themePreset">
+                  <option value="sunrise">朝焼け</option>
+                  <option value="lagoon">ラグーン</option>
+                  <option value="forest">フォレスト</option>
+                  <option value="paper">ペーパー</option>
+                  <option value="custom-image">好きな画像を使う</option>
+                </select>
+              </label>
+            </div>
+            <div class="field file-field" id="backgroundImageField" hidden>
+              <span>背景に使う画像</span>
+              <div class="file-picker">
+                <button type="button" class="file-picker-button" data-file-input-button="backgroundImageFile" data-focus-target="backgroundImageFile">ファイルを選択</button>
+                <span class="file-picker-name" id="backgroundImageFileName" aria-live="polite">未選択</span>
+                <button type="button" class="file-picker-button file-picker-clear" data-file-clear-target="backgroundImageFile">削除</button>
+              </div>
+              <input id="backgroundImageFile" name="backgroundImageFile" type="file" accept="image/*" class="file-input-native" data-file-name-target="backgroundImageFileName">
+              <p class="field-note">背景の透明度は、右のプレビュー欄で調整できます。</p>
+            </div>
+            <p class="field-note">ラベル文字色・入力文字色・アクセントとカード地色は、右のプレビュー欄で調整できます。</p>
+            <div class="field file-field">
+              <span>プロフィール画像（又はシンボル・ロゴetc）</span>
+              <div class="file-picker">
+                <button type="button" class="file-picker-button" data-file-input-button="avatarFile" data-focus-target="avatarFile">ファイルを選択</button>
+                <span class="file-picker-name" id="avatarFileName" aria-live="polite">未選択</span>
+                <button type="button" class="file-picker-button file-picker-clear" data-file-clear-target="avatarFile">削除</button>
+              </div>
+              <input id="avatarFile" name="avatarFile" type="file" accept="image/*" class="file-input-native" data-file-name-target="avatarFileName">
+            </div>
+          </section>
+        </form>
+      </section>
+
+      <section class="preview">
+        <div class="preview-header">
+          <div>
+            <p class="eyebrow">LIVE PREVIEW</p>
+            <h2>プレビュー</h2>
+          </div>
+          <div class="preview-meta">
+            <div class="preview-color-controls">
+              <div class="preview-color-row">
+                <label class="preview-color-chip">
+                  <span>ラベル文字色</span>
+                  <input id="labelTextColor" name="labelTextColor" type="color" form="cardForm" data-preview-color-control>
+                </label>
+                <label class="preview-color-chip">
+                  <span>入力文字色</span>
+                  <input id="textColor" name="textColor" type="color" form="cardForm" data-preview-color-control>
+                </label>
+                <label class="preview-color-chip preview-style-chip">
+                  <span>書式</span>
+                  <select id="textStylePreset" name="textStylePreset" form="cardForm" data-preview-color-control>
+                    <option value="type01">タイプ①</option>
+                    <option value="type02">タイプ②</option>
+                    <option value="type03">タイプ③</option>
+                    <option value="type04">タイプ④</option>
+                    <option value="type05">タイプ⑤</option>
+                    <option value="type06">タイプ⑥</option>
+                    <option value="type07">タイプ⑦</option>
+                    <option value="type08">タイプ⑧</option>
+                    <option value="type09">タイプ⑨</option>
+                    <option value="type10">タイプ⑩</option>
+                    <option value="type11">タイプ⑪</option>
+                    <option value="type12">タイプ⑫</option>
+                    <option value="type13">タイプ⑬</option>
+                    <option value="type14">タイプ⑭</option>
+                    <option value="type15">タイプ⑮</option>
+                  </select>
+                </label>
+                <label class="preview-color-chip">
+                  <span>アクセント</span>
+                  <input id="accentColor" name="accentColor" type="color" form="cardForm" data-preview-color-control>
+                </label>
+                <label class="preview-color-chip">
+                  <span>アクセント2</span>
+                  <input id="accentColorEnd" name="accentColorEnd" type="color" form="cardForm" data-preview-color-control>
+                </label>
+                <label class="preview-color-chip">
+                  <span>地色</span>
+                  <input id="surfaceColor" name="surfaceColor" type="color" form="cardForm" data-preview-color-control>
+                </label>
+                <label class="preview-color-chip">
+                  <span>地色2</span>
+                  <input id="surfaceColorEnd" name="surfaceColorEnd" type="color" form="cardForm" data-preview-color-control>
+                </label>
+              </div>
+              <p class="preview-color-note">同じ色にすると単色、変えるとグラデーションになります。</p>
+            </div>
+            <p class="preview-size" id="previewSizeLabel">1080 x 1350</p>
+            <div class="preview-zoom-control" aria-label="プレビューの拡大表示">
+              <div class="preview-zoom-head">
+                <span>表示倍率</span>
+                <output id="previewZoomValue" for="previewZoomRange" hidden>100%</output>
+              </div>
+              <div class="preview-zoom-buttons">
+                <button type="button" class="preview-zoom-button" id="previewZoomOut" data-preview-zoom-action="out" aria-label="プレビューを縮小">-</button>
+                <button type="button" class="preview-zoom-button" id="previewZoomReset" data-preview-zoom-action="reset">等倍</button>
+                <button type="button" class="preview-zoom-button" id="previewZoomIn" data-preview-zoom-action="in" aria-label="プレビューを拡大">+</button>
+              </div>
+            </div>
+            <div class="preview-opacity-control" id="backgroundOpacityControl" hidden>
+              <div class="preview-opacity-head">
+                <span>背景の透明度</span>
+                <output id="backgroundOverlayOpacityValue" for="backgroundOverlayOpacity">55%</output>
+              </div>
+              <input
+                id="backgroundOverlayOpacity"
+                name="backgroundOverlayOpacity"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="55"
+                form="cardForm"
+              >
+            </div>
+          </div>
+        </div>
+        <div class="preview-frame" id="previewFrame">
+          <div class="preview-adjust-toolbar" aria-label="画像編集ボタン">
+            <button type="button" class="preview-adjust-toggle" data-preview-adjust-target="background">画像編集（背景）</button>
+            <button type="button" class="preview-adjust-toggle" data-preview-adjust-target="avatar">画像編集（プロフィール）</button>
+          </div>
+          <div class="canvas-stage">
+            <canvas id="cardCanvas" width="1080" height="1350" aria-label="日常用自己紹介カードのプレビュー"></canvas>
+            <div class="social-overlay" id="socialOverlay" aria-hidden="true"></div>
+          </div>
+          <section class="preview-adjust-panel" id="previewAdjustPanel" hidden aria-live="polite">
+            <div class="preview-adjust-head">
+              <div>
+                <p class="eyebrow">PREVIEW ADJUST</p>
+                <h3 id="previewAdjustTitle">画像編集</h3>
+              </div>
+              <p class="preview-adjust-note" id="previewAdjustNote">画像の大きさと位置をここで編集できます。</p>
+            </div>
+            <button type="button" class="preview-adjust-close preview-adjust-close-main" id="previewAdjustCloseMain" aria-label="close">x</button>
+            <div class="range-grid preview-adjust-grid">
+              <label class="range-control">
+                <div class="range-control-head">
+                  <span>拡縮</span>
+                  <output id="previewAdjustScaleValue">100%</output>
+                </div>
+                <input id="previewAdjustScale" type="range" min="60" max="180" step="1" value="100">
+              </label>
+              <label class="range-control">
+                <div class="range-control-head">
+                  <span>左右</span>
+                  <output id="previewAdjustOffsetXValue">0</output>
+                </div>
+                <input id="previewAdjustOffsetX" type="range" min="-100" max="100" step="1" value="0">
+              </label>
+              <label class="range-control">
+                <div class="range-control-head">
+                  <span>上下</span>
+                  <output id="previewAdjustOffsetYValue">0</output>
+                </div>
+                <input id="previewAdjustOffsetY" type="range" min="-100" max="100" step="1" value="0">
+              </label>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <div class="hero-actions page-bottom-actions">
+      <button type="button" class="ghost" onclick="location.href='./index.html'">↩ トップへ戻る</button>
+    </div>
+    <div class="page-corner-actions">
+      <a class="ghost scroll-top-link" href="#" aria-label="ページの先頭へ戻る">
+        <span class="scroll-top-symbol" aria-hidden="true">⇪</span>
+        <span class="scroll-top-caption">ページの先頭へ戻る</span>
+      </a>
+    </div>
+  </div>
+  <script src="./common-profile.js?v=20260621e"></script>
+  <script src="./script.js?v=20260621f"></script>
+</body>
+</html>
