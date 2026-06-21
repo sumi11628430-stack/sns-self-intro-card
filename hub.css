@@ -216,11 +216,11 @@ a {
 }
 
 .common-field select.common-visibility-select {
-  width: 60px;
-  min-width: 60px;
+  width: 120px;
+  min-width: 120px;
   min-height: 36px;
-  padding: 6px 22px 6px 8px;
-  font-size: 0.72rem;
+  padding: 6px 26px 6px 10px;
+  font-size: 0.68rem;
 }
 
 .common-field textarea {
