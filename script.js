@@ -1767,10 +1767,10 @@ function getCanvasSize() {
 
 function renderStandardCard() {
   const safe = {
-    x: canvas.width * 0.07,
-    y: canvas.height * 0.06,
-    w: canvas.width * 0.86,
-    h: canvas.height * 0.88
+    x: canvas.width * 0.025,
+    y: canvas.height * 0.025,
+    w: canvas.width * 0.95,
+    h: canvas.height * 0.95
   };
 
   drawPanel(ctx, safe, state);
