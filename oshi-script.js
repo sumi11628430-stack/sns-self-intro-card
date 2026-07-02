@@ -3587,13 +3587,26 @@ function wrapLines(context, text, maxWidth) {
       const words = block.trim().split(/\s+/);
       let current = "";
 
-      words.forEach((word) => {
-        const test = current ? `${current} ${word}` : word;
-        if (context.measureText(test).width > maxWidth && current) {
+      const pushChar = (char) => {
+        const test = current + char;
+        if (current && context.measureText(test).width > maxWidth) {
           lines.push(current);
-          current = word;
+          current = char;
         } else {
           current = test;
+        }
+      };
+
+      words.forEach((word) => {
+        const test = current ? `${current} ${word}` : word;
+        if (current && context.measureText(test).width > maxWidth) {
+          lines.push(current);
+          current = "";
+        }
+        if (context.measureText(word).width > maxWidth) {
+          Array.from(word).forEach(pushChar);
+        } else {
+          current = current ? `${current} ${word}` : word;
         }
       });
 
