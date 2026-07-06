@@ -2,6 +2,8 @@ const pageStorageKey = document.body?.dataset.storageKey?.trim();
 const forcedLayoutMode = document.body?.dataset.forcedLayoutMode?.trim();
 const STORAGE_KEY = pageStorageKey || "sns-oshi-self-intro-card-state";
 
+let scratchMeasureContext = null;
+
 const defaultState = {
   displayName: "ひまり / @himari_otk",
   displayNameVisible: "show",
@@ -32,6 +34,7 @@ const defaultState = {
   themePreset: "paper",
   frameStyle: "soft",
   avatarShape: "rounded",
+  avatarRatio: "square",
   accentColor: "#e15c8e",
   accentColorEnd: "#ff9ec0",
   surfaceColor: "#fffafc",
@@ -195,64 +198,64 @@ const themePalettes = {
 
 const textStylePresets = {
   type01: {
-    fontFamily: "'Yu Gothic', sans-serif",
-    labelFontFamily: "'Yu Gothic', sans-serif"
+    fontFamily: "'Yu Gothic', 'Yu Gothic UI', sans-serif",
+    labelFontFamily: "'Yu Gothic', 'Yu Gothic UI', sans-serif"
   },
   type02: {
-    fontFamily: "'Comic Sans MS', 'Yu Gothic UI', 'Meiryo', sans-serif",
-    labelFontFamily: "'Comic Sans MS', 'Yu Gothic UI', 'Meiryo', sans-serif"
+    fontFamily: "'Comic Sans MS', 'BIZ UDGothic', sans-serif",
+    labelFontFamily: "'Comic Sans MS', 'BIZ UDGothic', sans-serif"
   },
   type03: {
     fontFamily: "'Yu Mincho', 'MS PMincho', serif",
     labelFontFamily: "'Yu Mincho', 'MS PMincho', serif"
   },
   type04: {
-    fontFamily: "Consolas, 'Meiryo UI', monospace",
-    labelFontFamily: "Consolas, 'Meiryo UI', monospace"
+    fontFamily: "Consolas, 'MS Gothic', monospace",
+    labelFontFamily: "Consolas, 'MS Gothic', monospace"
   },
   type05: {
-    fontFamily: "'Trebuchet MS', 'Yu Gothic UI', sans-serif",
-    labelFontFamily: "'Trebuchet MS', 'Yu Gothic UI', sans-serif"
+    fontFamily: "'Trebuchet MS', 'Meiryo', sans-serif",
+    labelFontFamily: "'Trebuchet MS', 'Meiryo', sans-serif"
   },
   type06: {
-    fontFamily: "Georgia, 'Yu Mincho', serif",
-    labelFontFamily: "Georgia, 'Yu Mincho', serif"
+    fontFamily: "Georgia, 'MS Mincho', serif",
+    labelFontFamily: "Georgia, 'MS Mincho', serif"
   },
   type07: {
-    fontFamily: "Verdana, 'Meiryo', sans-serif",
-    labelFontFamily: "Verdana, 'Meiryo', sans-serif"
+    fontFamily: "Verdana, 'UD Digi Kyokasho NP', 'BIZ UDGothic', sans-serif",
+    labelFontFamily: "Verdana, 'UD Digi Kyokasho NP', 'BIZ UDGothic', sans-serif"
   },
   type08: {
-    fontFamily: "'Palatino Linotype', 'Yu Mincho', serif",
-    labelFontFamily: "'Palatino Linotype', 'Yu Mincho', serif"
+    fontFamily: "'Palatino Linotype', 'BIZ UDMincho Medium', serif",
+    labelFontFamily: "'Palatino Linotype', 'BIZ UDMincho Medium', serif"
   },
   type09: {
-    fontFamily: "'Arial Black', 'Yu Gothic UI', sans-serif",
-    labelFontFamily: "'Arial Black', 'Yu Gothic UI', sans-serif"
+    fontFamily: "'Arial Black', 'MS PGothic', sans-serif",
+    labelFontFamily: "'Arial Black', 'MS PGothic', sans-serif"
   },
   type10: {
-    fontFamily: "'Courier New', 'Meiryo UI', monospace",
-    labelFontFamily: "'Courier New', 'Meiryo UI', monospace"
+    fontFamily: "'Courier New', 'MS UI Gothic', monospace",
+    labelFontFamily: "'Courier New', 'MS UI Gothic', monospace"
   },
   type11: {
-    fontFamily: "'Century Gothic', 'Yu Gothic UI', sans-serif",
-    labelFontFamily: "'Century Gothic', 'Yu Gothic UI', sans-serif"
+    fontFamily: "'Century Gothic', 'Meiryo UI', sans-serif",
+    labelFontFamily: "'Century Gothic', 'Meiryo UI', sans-serif"
   },
   type12: {
-    fontFamily: "'Times New Roman', 'Yu Mincho', serif",
-    labelFontFamily: "'Times New Roman', 'Yu Mincho', serif"
+    fontFamily: "'Times New Roman', 'MS PMincho', serif",
+    labelFontFamily: "'Times New Roman', 'MS PMincho', serif"
   },
   type13: {
-    fontFamily: "'Franklin Gothic Medium', 'Meiryo', sans-serif",
-    labelFontFamily: "'Franklin Gothic Medium', 'Meiryo', sans-serif"
+    fontFamily: "'Franklin Gothic Medium', 'BIZ UDPGothic', sans-serif",
+    labelFontFamily: "'Franklin Gothic Medium', 'BIZ UDPGothic', sans-serif"
   },
   type14: {
     fontFamily: "'Segoe UI', 'Yu Gothic UI', sans-serif",
     labelFontFamily: "'Segoe UI', 'Yu Gothic UI', sans-serif"
   },
   type15: {
-    fontFamily: "Impact, 'Arial Black', 'Yu Gothic UI', sans-serif",
-    labelFontFamily: "Impact, 'Arial Black', 'Yu Gothic UI', sans-serif"
+    fontFamily: "Impact, 'UD Digi Kyokasho NK', 'Arial Black', sans-serif",
+    labelFontFamily: "Impact, 'UD Digi Kyokasho NK', 'Arial Black', sans-serif"
   }
 };
 
@@ -302,6 +305,15 @@ const socialInputFields = [
   { key: "socialInstagram", labelKey: "socialInstagramLabel" },
   { key: "socialThreads", labelKey: "socialThreadsLabel" },
   { key: "socialTikTok", labelKey: "socialTikTokLabel" }
+];
+
+const SOCIAL_LABEL_OTHER_VALUE = "__other__";
+
+const socialLabelChoiceConfigs = [
+  { choiceId: "socialXLabelChoice", inputId: "socialXLabel" },
+  { choiceId: "socialInstagramLabelChoice", inputId: "socialInstagramLabel" },
+  { choiceId: "socialThreadsLabelChoice", inputId: "socialThreadsLabel" },
+  { choiceId: "socialTikTokLabelChoice", inputId: "socialTikTokLabel" }
 ];
 
 const socialIconMarkup = {
@@ -648,6 +660,8 @@ if (form) {
   form.addEventListener("input", handleFieldChange);
   form.addEventListener("change", handleFieldChange);
 }
+setupSocialLabelChoices();
+setupTextStylePreview();
 if (avatarInput) {
   avatarInput.addEventListener("change", handleAvatarUpload);
 }
@@ -1175,6 +1189,89 @@ function applyStateToForm(currentState) {
   });
   syncRangeValueOutputs();
   syncPreviewAdjustPanel();
+  syncSocialLabelChoices();
+}
+
+function syncSocialLabelChoices() {
+  socialLabelChoiceConfigs.forEach(({ choiceId, inputId }) => {
+    const choice = document.getElementById(choiceId);
+    const input = document.getElementById(inputId);
+    if (!choice || !input) {
+      return;
+    }
+
+    const currentValue = input.value || "";
+    const matchesPreset = Array.from(choice.options).some(
+      (option) => option.value !== SOCIAL_LABEL_OTHER_VALUE && option.value === currentValue
+    );
+
+    choice.value = matchesPreset ? currentValue : SOCIAL_LABEL_OTHER_VALUE;
+    input.hidden = matchesPreset;
+  });
+}
+
+function setupSocialLabelChoices() {
+  socialLabelChoiceConfigs.forEach(({ choiceId, inputId }) => {
+    const choice = document.getElementById(choiceId);
+    const input = document.getElementById(inputId);
+    if (!choice || !input) {
+      return;
+    }
+
+    choice.addEventListener("change", (event) => {
+      event.stopPropagation();
+      if (choice.value === SOCIAL_LABEL_OTHER_VALUE) {
+        input.hidden = false;
+        input.focus();
+        return;
+      }
+
+      input.hidden = true;
+      input.value = choice.value;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  });
+}
+
+function setupTextStylePreview() {
+  const select = document.getElementById("textStylePreset");
+  if (!select) {
+    return;
+  }
+
+  const sampleText = "あいうえお";
+  const measureFontSize = 100;
+  const baseOptionFontSizeRem = 1.98;
+  const measureCanvas = document.createElement("canvas");
+  const measureCtx = measureCanvas.getContext("2d");
+
+  const entries = Array.from(select.options)
+    .map((option) => ({ option, preset: textStylePresets[option.value] }))
+    .filter(({ preset }) => Boolean(preset));
+
+  const measurements = entries.map(({ preset }) => {
+    measureCtx.font = `700 ${measureFontSize}px ${preset.fontFamily}`;
+    const metrics = measureCtx.measureText(sampleText);
+    const ascent = metrics.actualBoundingBoxAscent || measureFontSize * 0.7;
+    const descent = metrics.actualBoundingBoxDescent || 0;
+    return ascent + descent;
+  });
+
+  const averageHeight = measurements.reduce((sum, height) => sum + height, 0) / measurements.length;
+
+  entries.forEach(({ option, preset }, index) => {
+    option.style.fontFamily = preset.fontFamily;
+
+    const height = measurements[index];
+    const scale = height > 0 ? averageHeight / height : 1;
+    const clampedScale = Math.min(Math.max(scale, 0.75), 1.6);
+    option.style.fontSize = `${(baseOptionFontSizeRem * clampedScale).toFixed(3)}rem`;
+
+    if (!option.dataset.previewApplied) {
+      option.textContent = `あいうえお（${option.textContent}）`;
+      option.dataset.previewApplied = "true";
+    }
+  });
 }
 
 function syncManagedFileInputNames() {
@@ -1831,17 +1928,20 @@ function renderStandardCard() {
   const checklistItems = collectChecklistItems();
   const socialLinks = collectSocialLinks();
   const avatarSize = clamp(inner.w * 0.255, 178, 248);
+  const avatarDims = getAvatarDimensions(avatarSize, state.avatarRatio);
   const gap = canvas.width * 0.034;
   const avatarBox = {
     x: inner.x,
     y: inner.y,
-    size: avatarSize
+    size: avatarSize,
+    w: avatarDims.w,
+    h: avatarDims.h
   };
   const headerRight = {
-    x: avatarBox.x + avatarBox.size + gap,
+    x: avatarBox.x + avatarBox.w + gap,
     y: inner.y,
-    w: inner.x + inner.w - (avatarBox.x + avatarBox.size + gap),
-    h: avatarBox.size
+    w: inner.x + inner.w - (avatarBox.x + avatarBox.w + gap),
+    h: avatarBox.h
   };
 
   const focusItems = [
@@ -1851,9 +1951,9 @@ function renderStandardCard() {
       "プロフィール画像",
       avatarBox.x - 10,
       avatarBox.y - 10,
-      avatarBox.size + 20,
-      avatarBox.size + 20,
-      Math.round(avatarBox.size * 0.26)
+      avatarBox.w + 20,
+      avatarBox.h + 20,
+      Math.round(Math.min(avatarBox.w, avatarBox.h) * 0.26)
     )
   ];
 
@@ -1884,16 +1984,28 @@ function renderStandardCard() {
   const reservedSocialBottom = socialLinks.length
     ? introBottom + clamp(canvas.width * 0.015, 10, 14) + 38
     : introBottom;
-  const sectionStart = Math.max(avatarBox.y + avatarBox.size, reservedSocialBottom) + canvas.width * 0.026;
+  const sectionStart = Math.max(avatarBox.y + avatarBox.h, reservedSocialBottom) + canvas.width * 0.026;
   let sectionBottom = sectionStart - canvas.width * 0.03;
   let metaHotspots = [];
   if (metaItems.length) {
-    const qrColumnGap = socialLinks.length ? 14 : 0;
-    const qrColumnWidth = socialLinks.length ? clamp(inner.w * 0.15, 104, 120) : 0;
+    const qrColumnGap = socialLinks.length ? 16 : 0;
+    const qrColumnWidth = socialLinks.length ? clamp(inner.w * 0.34, 300, 360) : 0;
     const metaWidth = socialLinks.length
-      ? Math.max(inner.w - qrColumnWidth - qrColumnGap, inner.w * 0.7)
+      ? inner.w - qrColumnWidth - qrColumnGap
       : inner.w;
-    const metaLayout = drawMetaInfo(ctx, metaItems, inner.x, sectionStart, metaWidth, accent, text);
+
+    let metaScale = 1;
+    let socialScale = 1;
+    if (socialLinks.length) {
+      const scratchCtx = getScratchContext();
+      const metaNaturalHeight = drawMetaInfo(scratchCtx, metaItems, 0, 0, metaWidth, accent, text).bottom;
+      const socialNaturalHeight = measureStandardSocialQrGridHeight(socialLinks);
+      const targetHeight = Math.max(metaNaturalHeight, socialNaturalHeight);
+      metaScale = metaNaturalHeight > 0 ? clamp(targetHeight / metaNaturalHeight, 1, 1.25) : 1;
+      socialScale = socialNaturalHeight > 0 ? clamp(targetHeight / socialNaturalHeight, 1, 1.25) : 1;
+    }
+
+    const metaLayout = drawMetaInfo(ctx, metaItems, inner.x, sectionStart, metaWidth, accent, text, metaScale);
     sectionBottom = metaLayout.bottom;
     metaHotspots = metaLayout.items;
     if (socialLinks.length) {
@@ -1904,13 +2016,14 @@ function renderStandardCard() {
         sectionStart + 2,
         qrColumnWidth,
         accent,
-        text
+        text,
+        socialScale
       );
       focusItems.push(...qrLayout.items);
       sectionBottom = Math.max(sectionBottom, qrLayout.bottom);
     }
   } else if (socialLinks.length) {
-    const qrColumnWidth = clamp(inner.w * 0.15, 104, 120);
+    const qrColumnWidth = clamp(inner.w * 0.34, 300, 360);
     const qrLayout = drawStandardSocialQrGrid(
       ctx,
       socialLinks,
@@ -2872,22 +2985,35 @@ function drawFrameAccent(context, safe, inner, currentState) {
   context.restore();
 }
 
+function getAvatarDimensions(baseSize, avatarRatio) {
+  if (avatarRatio === "portrait") {
+    return { w: baseSize * 0.82, h: baseSize * 1.18 };
+  }
+  if (avatarRatio === "landscape") {
+    return { w: baseSize * 1.18, h: baseSize * 0.82 };
+  }
+  return { w: baseSize, h: baseSize };
+}
+
 function drawAvatar(context, avatarBox, currentState, accent, textColor) {
   const avatarTransform = getAvatarTransformState(currentState);
+  const w = avatarBox.w ?? avatarBox.size;
+  const h = avatarBox.h ?? avatarBox.size;
+  const cornerBase = Math.min(w, h);
   context.save();
-  context.fillStyle = getAccentFill(context, avatarBox.x - 10, avatarBox.y - 10, avatarBox.size + 20, avatarBox.size + 20, 0.14, 0.24);
-  roundRect(context, avatarBox.x - 10, avatarBox.y - 10, avatarBox.size + 20, avatarBox.size + 20, avatarBox.size * 0.26);
+  context.fillStyle = getAccentFill(context, avatarBox.x - 10, avatarBox.y - 10, w + 20, h + 20, 0.14, 0.24);
+  roundRect(context, avatarBox.x - 10, avatarBox.y - 10, w + 20, h + 20, cornerBase * 0.26);
   context.fill();
 
-  beginAvatarPath(context, avatarBox.x, avatarBox.y, avatarBox.size, currentState.avatarShape);
+  beginAvatarPath(context, avatarBox.x, avatarBox.y, w, h, currentState.avatarShape);
   context.clip();
 
   if (avatarImage) {
     drawImageToBox(context, avatarImage, {
       x: avatarBox.x,
       y: avatarBox.y,
-      w: avatarBox.size,
-      h: avatarBox.size
+      w,
+      h
     }, {
       fitMode: "cover",
       scalePercent: avatarTransform.scale,
@@ -2895,17 +3021,17 @@ function drawAvatar(context, avatarBox, currentState, accent, textColor) {
       offsetY: avatarTransform.offsetY
     });
   } else {
-    const gradient = context.createLinearGradient(avatarBox.x, avatarBox.y, avatarBox.x + avatarBox.size, avatarBox.y + avatarBox.size);
+    const gradient = context.createLinearGradient(avatarBox.x, avatarBox.y, avatarBox.x + w, avatarBox.y + h);
     gradient.addColorStop(0, hexToRgba(currentState.accentColor, 0.94));
     gradient.addColorStop(1, hexToRgba(currentState.accentColorEnd || currentState.accentColor, 0.94));
     context.fillStyle = gradient;
-    context.fillRect(avatarBox.x, avatarBox.y, avatarBox.size, avatarBox.size);
+    context.fillRect(avatarBox.x, avatarBox.y, w, h);
 
     context.fillStyle = hexToRgba("#ffffff", 0.92);
-    context.font = getCanvasFont(Math.floor(avatarBox.size * 0.32), 700, "body");
+    context.font = getCanvasFont(Math.floor(cornerBase * 0.32), 700, "body");
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(getInitials(currentState.displayName), avatarBox.x + avatarBox.size / 2, avatarBox.y + avatarBox.size / 2 + 4);
+    context.fillText(getInitials(currentState.displayName), avatarBox.x + w / 2, avatarBox.y + h / 2 + 4);
   }
 
   context.restore();
@@ -2913,7 +3039,7 @@ function drawAvatar(context, avatarBox, currentState, accent, textColor) {
   context.save();
   context.strokeStyle = hexToRgba(textColor, 0.08);
   context.lineWidth = 3;
-  beginAvatarPath(context, avatarBox.x, avatarBox.y, avatarBox.size, currentState.avatarShape);
+  beginAvatarPath(context, avatarBox.x, avatarBox.y, w, h, currentState.avatarShape);
   context.stroke();
   context.restore();
 }
@@ -3048,36 +3174,44 @@ function drawSocialLinks(context, links, x, y, maxWidth, options = {}) {
   };
 }
 
-function drawStandardSocialQrGrid(context, links, x, y, width, accent, textColor) {
+function measureStandardSocialQrGridHeight(links, scale = 1) {
+  const rows = Math.min(links.length, 4);
+  if (!rows) {
+    return 0;
+  }
+
+  const rowGap = 12 * scale;
+  const rowHeight = 46 * scale;
+  return rows * rowHeight + Math.max(rows - 1, 0) * rowGap;
+}
+
+function drawStandardSocialQrGrid(context, links, x, y, width, accent, textColor, scale = 1) {
   void textColor;
   if (!links.length) {
     return { bottom: y, items: [] };
   }
 
   const visibleLinks = links.slice(0, 4);
-  const columns = 2;
+  const columns = 1;
   const rows = Math.ceil(visibleLinks.length / columns);
-  const labelHeight = 12;
-  const gap = 8;
-  const tileSize = clamp(Math.floor((width - gap) / columns), 44, 54);
+  const colGap = 14;
+  const rowGap = 12 * scale;
+  const rowHeight = 46 * scale;
+  const cellWidth = Math.floor((width - colGap * (columns - 1)) / columns);
   const items = [];
 
   visibleLinks.forEach((link, index) => {
     const col = index % columns;
     const row = Math.floor(index / columns);
-    const labelY = y + row * (labelHeight + tileSize + gap);
-    const rowItemCount = Math.min(columns, visibleLinks.length - row * columns);
-    const rowWidth = rowItemCount * tileSize + Math.max(rowItemCount - 1, 0) * gap;
-    const rowStartX = x + Math.max((width - rowWidth) / 2, 0);
-    const tileX = rowStartX + col * (tileSize + gap);
-    const tileY = labelY + labelHeight;
+    const cellX = x + col * (cellWidth + colGap);
+    const cellY = y + row * (rowHeight + rowGap);
 
-    drawQrTile(context, link, tileX, tileY, tileSize, accent, getSocialQrLabel(link));
-    items.push(makeExternalLinkItem(link.url, link.label, tileX, labelY, tileSize, labelHeight + tileSize, 12));
+    drawAddressRow(context, link, cellX, cellY, cellWidth, accent, getSocialQrLabel(link), scale);
+    items.push(makeExternalLinkItem(link.url, link.label, cellX, cellY, cellWidth, rowHeight, 8));
   });
 
   return {
-    bottom: y + rows * (labelHeight + tileSize) + Math.max(rows - 1, 0) * gap,
+    bottom: y + rows * rowHeight + Math.max(rows - 1, 0) * rowGap,
     items
   };
 }
@@ -3187,23 +3321,59 @@ function drawQrTile(context, link, x, y, size, accent, labelText) {
   context.fillText("loading", x + size / 2, y + size / 2 + 8);
 }
 
-function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor) {
-  const tagHeight = 46;
+function truncateTextToWidth(context, text, maxWidth) {
+  if (context.measureText(text).width <= maxWidth) {
+    return text;
+  }
+
+  let result = text;
+  while (result.length > 1 && context.measureText(`${result}…`).width > maxWidth) {
+    result = result.slice(0, -1);
+  }
+  return `${result}…`;
+}
+
+function drawAddressRow(context, link, x, y, width, accent, labelText, scale = 1) {
+  const label = clampText(labelText || "URL", 14);
+
+  context.textAlign = "left";
+  context.textBaseline = "top";
+  context.fillStyle = hexToRgba(getLabelTextColor(), 0.78);
+  context.font = getCanvasFont(13 * scale, 800, "label");
+  context.fillText(label, x, y);
+
+  const address = formatSocialAddress(link.url, 60);
+  const addressFontSize = fitSingleLineFont(context, address, 20 * scale, 13 * scale, width, "body");
+  context.font = getCanvasFont(addressFontSize, 600, "body");
+  const displayAddress = truncateTextToWidth(context, address, width);
+
+  context.fillStyle = hexToRgba(accent, 0.94);
+  context.fillText(displayAddress, x, y + 20 * scale);
+}
+
+function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor, scale = 1) {
+  const tagHeight = 46 * scale;
   const horizontalGap = 10;
-  const verticalGap = 8;
+  const verticalGap = 8 * scale;
+  const paddingX = 15 * scale;
   let cursorX = x;
   let cursorY = y;
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = getCanvasFont(20, 700, "body");
+  context.font = getCanvasFont(20 * scale, 700, "body");
 
   const hotspotItems = [];
 
   items.forEach((item) => {
     const label = `${item.label}：`;
-    const value = String(item.value || "").trim();
-    const width = Math.min(context.measureText(`${label}${value}`).width + 30, maxWidth);
+    const rawValue = String(item.value || "").trim();
+    const labelWidth = context.measureText(label).width;
+    const maxTextWidth = Math.max(maxWidth - paddingX * 2, 20);
+    const value = labelWidth + context.measureText(rawValue).width > maxTextWidth
+      ? truncateTextToWidth(context, rawValue, Math.max(maxTextWidth - labelWidth, 10))
+      : rawValue;
+    const width = Math.min(labelWidth + context.measureText(value).width + paddingX * 2, maxWidth);
 
     if (cursorX + width > x + maxWidth) {
       cursorX = x;
@@ -3214,11 +3384,11 @@ function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor) {
     roundRect(context, cursorX, cursorY, width, tagHeight, 18);
     context.fill();
 
-    const textX = cursorX + 15;
+    const textX = cursorX + paddingX;
     context.fillStyle = hexToRgba(getLabelTextColor(), 0.84);
     context.fillText(label, textX, cursorY + tagHeight / 2 + 1);
     context.fillStyle = textColor;
-    context.fillText(value, textX + context.measureText(label).width, cursorY + tagHeight / 2 + 1);
+    context.fillText(value, textX + labelWidth, cursorY + tagHeight / 2 + 1);
 
     hotspotItems.push({
       type: "focus",
@@ -3369,8 +3539,8 @@ function drawOshiItemGrid(context, items, x, y, width, height, accent, textColor
   const gap = 10;
   const columns = 2;
   const rows = Math.ceil(items.length / columns);
-  const cardWidth = (width - gap * (columns - 1)) / columns;
-  const cardHeight = (height - gap * (rows - 1)) / rows;
+  const cardWidth = Math.max((width - gap * (columns - 1)) / columns, 10);
+  const cardHeight = Math.max((height - gap * (rows - 1)) / rows, 10);
   const hotspotItems = [];
 
   items.forEach((item, index) => {
@@ -3542,7 +3712,7 @@ function collectPrintSocialAddresses() {
 }
 
 function roundRect(context, x, y, width, height, radius) {
-  const r = Math.min(radius, width / 2, height / 2);
+  const r = Math.max(Math.min(radius, width / 2, height / 2), 0);
   context.beginPath();
   context.moveTo(x + r, y);
   context.arcTo(x + width, y, x + width, y + height, r);
@@ -3552,25 +3722,25 @@ function roundRect(context, x, y, width, height, radius) {
   context.closePath();
 }
 
-function beginAvatarPath(context, x, y, size, avatarShape) {
+function beginAvatarPath(context, x, y, w, h, avatarShape) {
   context.beginPath();
 
   if (avatarShape === "rounded") {
-    roundRect(context, x, y, size, size, size * 0.22);
+    roundRect(context, x, y, w, h, Math.min(w, h) * 0.22);
     return;
   }
 
   if (avatarShape === "blob") {
-    context.moveTo(x + size * 0.48, y + size * 0.03);
-    context.bezierCurveTo(x + size * 0.88, y - size * 0.02, x + size * 1.03, y + size * 0.3, x + size * 0.94, y + size * 0.56);
-    context.bezierCurveTo(x + size * 0.9, y + size * 0.92, x + size * 0.56, y + size * 1.05, x + size * 0.28, y + size * 0.94);
-    context.bezierCurveTo(x + size * 0.04, y + size * 0.84, x - size * 0.05, y + size * 0.5, x + size * 0.04, y + size * 0.22);
-    context.bezierCurveTo(x + size * 0.11, y + size * 0.05, x + size * 0.29, y - size * 0.02, x + size * 0.48, y + size * 0.03);
+    context.moveTo(x + w * 0.48, y + h * 0.03);
+    context.bezierCurveTo(x + w * 0.88, y - h * 0.02, x + w * 1.03, y + h * 0.3, x + w * 0.94, y + h * 0.56);
+    context.bezierCurveTo(x + w * 0.9, y + h * 0.92, x + w * 0.56, y + h * 1.05, x + w * 0.28, y + h * 0.94);
+    context.bezierCurveTo(x + w * 0.04, y + h * 0.84, x - w * 0.05, y + h * 0.5, x + w * 0.04, y + h * 0.22);
+    context.bezierCurveTo(x + w * 0.11, y + h * 0.05, x + w * 0.29, y - h * 0.02, x + w * 0.48, y + h * 0.03);
     context.closePath();
     return;
   }
 
-  context.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+  context.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
 }
 
 function wrapLines(context, text, maxWidth) {
@@ -4175,6 +4345,13 @@ function getInitials(name) {
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+function getScratchContext() {
+  if (!scratchMeasureContext) {
+    scratchMeasureContext = document.createElement("canvas").getContext("2d");
+  }
+  return scratchMeasureContext;
 }
 
 function clampText(value, maxLength) {

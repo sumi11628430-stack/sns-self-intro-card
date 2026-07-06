@@ -916,13 +916,12 @@ button {
 }
 
 .preview-color-controls {
-  flex: 0 0 100%;
-  width: 100%;
+  flex: 0 1 auto;
 }
 
 .preview-frame {
   position: relative;
-  margin-top: 18px;
+  margin-top: 10px;
   padding: 22px;
   border-radius: calc(var(--radius-xl) - 8px);
   background:
@@ -1299,17 +1298,18 @@ canvas {
 }
 
 .preview-color-controls {
-  width: min(396px, 100%);
+  width: auto;
   display: grid;
   gap: 7px;
   margin-top: 0;
+  margin-right: auto;
 }
 
 .preview-color-row {
   display: flex;
   flex-wrap: wrap;
   align-items: start;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 10px;
 }
 
@@ -1365,6 +1365,44 @@ canvas {
   font-size: 0.66rem;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.preview-style-chip select option {
+  font-size: 1.98rem;
+  padding: 10px 12px;
+}
+
+.toolbar-style-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+}
+
+.toolbar-style-chip > span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.toolbar-style-chip select {
+  min-width: 96px;
+  min-height: 30px;
+  padding: 0 24px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.toolbar-style-chip select option {
+  font-size: 1.98rem;
+  padding: 10px 12px;
 }
 
 .preview-color-note {

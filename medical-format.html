@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>闘病用自己紹介フォーマット</title>
-  <link rel="stylesheet" href="./style.css?v=20260622c">
+  <link rel="stylesheet" href="./style.css?v=20260704e">
 </head>
 <body class="medical-page">
   <div class="page-shell">
@@ -160,22 +160,94 @@
               <div class="social-input-grid">
                 <label class="field inline-field">
                   <span>表示名</span>
-                  <input id="socialXLabel" name="socialXLabel" type="text" maxlength="20" placeholder="X / BOOTH / ブログ">
+                  <select id="socialXLabelChoice" class="social-label-choice" data-label-target="socialXLabel" aria-label="表示名を選択">
+                    <option value="X">X</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Threads">Threads</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="Bluesky">Bluesky</option>
+                    <option value="LINE">LINE</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="note">note</option>
+                    <option value="BOOTH">BOOTH</option>
+                    <option value="pixiv">pixiv</option>
+                    <option value="Lit.Link">Lit.Link</option>
+                    <option value="ブログ">ブログ</option>
+                    <option value="公式サイト">公式サイト</option>
+                    <option value="通販">通販</option>
+                    <option value="__other__">その他（自由入力）</option>
+                  </select>
+                  <input id="socialXLabel" name="socialXLabel" type="text" maxlength="20" placeholder="表示名を入力" class="social-label-custom" hidden>
                   <input id="socialX" name="socialX" type="url" maxlength="160" placeholder="https://example.com/your_link">
                 </label>
                 <label class="field inline-field">
                   <span>表示名</span>
-                  <input id="socialInstagramLabel" name="socialInstagramLabel" type="text" maxlength="20" placeholder="Instagram / 通販 / サイト">
+                  <select id="socialInstagramLabelChoice" class="social-label-choice" data-label-target="socialInstagramLabel" aria-label="表示名を選択">
+                    <option value="X">X</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Threads">Threads</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="Bluesky">Bluesky</option>
+                    <option value="LINE">LINE</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="note">note</option>
+                    <option value="BOOTH">BOOTH</option>
+                    <option value="pixiv">pixiv</option>
+                    <option value="Lit.Link">Lit.Link</option>
+                    <option value="ブログ">ブログ</option>
+                    <option value="公式サイト">公式サイト</option>
+                    <option value="通販">通販</option>
+                    <option value="__other__">その他（自由入力）</option>
+                  </select>
+                  <input id="socialInstagramLabel" name="socialInstagramLabel" type="text" maxlength="20" placeholder="表示名を入力" class="social-label-custom" hidden>
                   <input id="socialInstagram" name="socialInstagram" type="url" maxlength="160" placeholder="https://example.com/your_link">
                 </label>
                 <label class="field inline-field">
                   <span>表示名</span>
-                  <input id="socialThreadsLabel" name="socialThreadsLabel" type="text" maxlength="20" placeholder="Threads / Lit.Link / ブログ">
+                  <select id="socialThreadsLabelChoice" class="social-label-choice" data-label-target="socialThreadsLabel" aria-label="表示名を選択">
+                    <option value="X">X</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Threads">Threads</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="Bluesky">Bluesky</option>
+                    <option value="LINE">LINE</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="note">note</option>
+                    <option value="BOOTH">BOOTH</option>
+                    <option value="pixiv">pixiv</option>
+                    <option value="Lit.Link">Lit.Link</option>
+                    <option value="ブログ">ブログ</option>
+                    <option value="公式サイト">公式サイト</option>
+                    <option value="通販">通販</option>
+                    <option value="__other__">その他（自由入力）</option>
+                  </select>
+                  <input id="socialThreadsLabel" name="socialThreadsLabel" type="text" maxlength="20" placeholder="表示名を入力" class="social-label-custom" hidden>
                   <input id="socialThreads" name="socialThreads" type="url" maxlength="160" placeholder="https://example.com/your_link">
                 </label>
                 <label class="field inline-field">
                   <span>表示名</span>
-                  <input id="socialTikTokLabel" name="socialTikTokLabel" type="text" maxlength="20" placeholder="TikTok / YouTube / 公式">
+                  <select id="socialTikTokLabelChoice" class="social-label-choice" data-label-target="socialTikTokLabel" aria-label="表示名を選択">
+                    <option value="X">X</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Threads">Threads</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="YouTube">YouTube</option>
+                    <option value="Bluesky">Bluesky</option>
+                    <option value="LINE">LINE</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="note">note</option>
+                    <option value="BOOTH">BOOTH</option>
+                    <option value="pixiv">pixiv</option>
+                    <option value="Lit.Link">Lit.Link</option>
+                    <option value="ブログ">ブログ</option>
+                    <option value="公式サイト">公式サイト</option>
+                    <option value="通販">通販</option>
+                    <option value="__other__">その他（自由入力）</option>
+                  </select>
+                  <input id="socialTikTokLabel" name="socialTikTokLabel" type="text" maxlength="20" placeholder="表示名を入力" class="social-label-custom" hidden>
                   <input id="socialTikTok" name="socialTikTok" type="url" maxlength="160" placeholder="https://example.com/your_link">
                 </label>
               </div>
@@ -276,11 +348,11 @@
                 <p class="field-note" id="sizePresetNote">通常カードではサイズを自由に選べます。</p>
               </label>
               <label class="field">
-                <span>アバター形状</span>
-                <select id="avatarShape" name="avatarShape">
-                  <option value="circle">円形</option>
-                  <option value="rounded">角丸</option>
-                  <option value="blob">ふんわり</option>
+                <span>アバターサイズ</span>
+                <select id="avatarRatio" name="avatarRatio">
+                  <option value="square">正方形</option>
+                  <option value="portrait">長方形・縦</option>
+                  <option value="landscape">長方形・横</option>
                 </select>
               </label>
             </div>
@@ -293,6 +365,14 @@
                   <option value="forest">フォレスト</option>
                   <option value="paper">ペーパー</option>
                   <option value="custom-image">好きな画像を使う</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>アバター形状</span>
+                <select id="avatarShape" name="avatarShape">
+                  <option value="circle">円形</option>
+                  <option value="rounded">角丸</option>
+                  <option value="blob">ふんわり</option>
                 </select>
               </label>
             </div>
@@ -328,6 +408,7 @@
           </div>
           <div class="preview-meta">
             <div class="preview-color-controls">
+              <p class="preview-color-note">同じ色にすると単色、変えるとグラデーションになります。</p>
               <div class="preview-color-row">
                 <label class="preview-color-chip">
                   <span>ラベル文字色</span>
@@ -336,26 +417,6 @@
                 <label class="preview-color-chip">
                   <span>入力文字色</span>
                   <input id="textColor" name="textColor" type="color" form="cardForm" data-preview-color-control>
-                </label>
-                <label class="preview-color-chip preview-style-chip">
-                  <span>書式</span>
-                  <select id="textStylePreset" name="textStylePreset" form="cardForm" data-preview-color-control>
-                    <option value="type01">タイプ①</option>
-                    <option value="type02">タイプ②</option>
-                    <option value="type03">タイプ③</option>
-                    <option value="type04">タイプ④</option>
-                    <option value="type05">タイプ⑤</option>
-                    <option value="type06">タイプ⑥</option>
-                    <option value="type07">タイプ⑦</option>
-                    <option value="type08">タイプ⑧</option>
-                    <option value="type09">タイプ⑨</option>
-                    <option value="type10">タイプ⑩</option>
-                    <option value="type11">タイプ⑪</option>
-                    <option value="type12">タイプ⑫</option>
-                    <option value="type13">タイプ⑬</option>
-                    <option value="type14">タイプ⑭</option>
-                    <option value="type15">タイプ⑮</option>
-                  </select>
                 </label>
                 <label class="preview-color-chip">
                   <span>アクセント</span>
@@ -374,7 +435,6 @@
                   <input id="surfaceColorEnd" name="surfaceColorEnd" type="color" form="cardForm" data-preview-color-control>
                 </label>
               </div>
-              <p class="preview-color-note">同じ色にすると単色、変えるとグラデーションになります。</p>
             </div>
             <p class="preview-size" id="previewSizeLabel">1080 x 1350</p>
             <div class="preview-zoom-control" aria-label="プレビューの拡大表示">
@@ -408,6 +468,21 @@
         </div>
         <div class="preview-frame" id="previewFrame">
           <div class="preview-adjust-toolbar" aria-label="画像編集ボタン">
+            <label class="toolbar-style-chip">
+              <span>書式</span>
+              <select id="textStylePreset" name="textStylePreset" form="cardForm" data-preview-color-control>
+                <option value="type02">タイプ①</option>
+                <option value="type04">タイプ②</option>
+                <option value="type05">タイプ③</option>
+                <option value="type07">タイプ④</option>
+                <option value="type08">タイプ⑤</option>
+                <option value="type10">タイプ⑥</option>
+                <option value="type11">タイプ⑦</option>
+                <option value="type12">タイプ⑧</option>
+                <option value="type14">タイプ⑨</option>
+                <option value="type15">タイプ⑩</option>
+              </select>
+            </label>
             <button type="button" class="preview-adjust-toggle" data-preview-adjust-target="background">画像編集（背景）</button>
             <button type="button" class="preview-adjust-toggle" data-preview-adjust-target="avatar">画像編集（プロフィール）</button>
           </div>
@@ -461,8 +536,8 @@
       </a>
     </div>
   </div>
-  <script src="./common-profile.js?v=20260621f"></script>
-  <script src="./medical-script.js?v=20260621f"></script>
-  <script src="./mobile-preview.js?v=20260622a"></script>
+  <script src="./common-profile.js?v=20260704e"></script>
+  <script src="./medical-script.js?v=20260704e"></script>
+  <script src="./mobile-preview.js?v=20260704e"></script>
 </body>
 </html>
