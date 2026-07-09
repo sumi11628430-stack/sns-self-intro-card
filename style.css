@@ -1405,6 +1405,91 @@ canvas {
   padding: 10px 12px;
 }
 
+/* 書式選択: 横スクロールする見本チップ（ネイティブselectは状態保持用に視覚的非表示） */
+.style-preset-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.style-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.style-chip-row-label {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.style-chip-strip {
+  display: flex;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.style-chip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 62px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.style-chip:hover {
+  border-color: rgba(236, 123, 70, 0.5);
+}
+
+.style-chip-sample {
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.style-chip-name {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.style-chip.is-active {
+  border-color: var(--accent);
+  background: rgba(236, 123, 70, 0.12);
+  box-shadow: 0 0 0 2px rgba(236, 123, 70, 0.28);
+}
+
+.style-chip.is-active .style-chip-name {
+  color: var(--accent);
+}
+
 .preview-color-note {
   margin: 0;
   font-size: 0.68rem;

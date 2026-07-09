@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>推し活用 印刷して使える名刺</title>
-  <link rel="stylesheet" href="./style.css?v=20260704e">
+  <link rel="stylesheet" href="./style.css?v=20260709a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&family=Shippori+Mincho:wght@400;700&family=DotGothic16&family=Noto+Serif+JP:wght@400;700&family=RocknRoll+One&family=Zen+Kaku+Gothic+New:wght@400;700&family=Klee+One:wght@400;600&family=Stick&family=Dela+Gothic+One&family=Yusei+Magic&family=Hachi+Maru+Pop&family=Kaisei+Decol:wght@400;700&family=Mochiy+Pop+One&family=Reggae+One&display=swap">
 </head>
 <body class="oshi-page" data-storage-key="sns-oshi-print-card-state" data-forced-layout-mode="business">
   <div class="page-shell">
@@ -308,7 +311,6 @@
                   <option value="lagoon">ラグーン</option>
                   <option value="forest">フォレスト</option>
                   <option value="paper">ペーパー</option>
-                  <option value="custom-image">好きな画像を使う</option>
                 </select>
               </label>
             </div>
@@ -368,26 +370,23 @@
                   <span>入力文字色</span>
                   <input id="textColor" name="textColor" type="color" form="cardForm" data-preview-color-control>
                 </label>
-                <label class="preview-color-chip preview-style-chip">
-                  <span>書式</span>
-                  <select id="textStylePreset" name="textStylePreset" form="cardForm" data-preview-color-control>
-                    <option value="type01">タイプ①</option>
-                    <option value="type02">タイプ②</option>
-                    <option value="type03">タイプ③</option>
-                    <option value="type04">タイプ④</option>
-                    <option value="type05">タイプ⑤</option>
-                    <option value="type06">タイプ⑥</option>
-                    <option value="type07">タイプ⑦</option>
-                    <option value="type08">タイプ⑧</option>
-                    <option value="type09">タイプ⑨</option>
-                    <option value="type10">タイプ⑩</option>
-                    <option value="type11">タイプ⑪</option>
-                    <option value="type12">タイプ⑫</option>
-                    <option value="type13">タイプ⑬</option>
-                    <option value="type14">タイプ⑭</option>
-                    <option value="type15">タイプ⑮</option>
-                  </select>
-                </label>
+                <select id="textStylePreset" name="textStylePreset" form="cardForm" data-preview-color-control class="style-preset-native" tabindex="-1" aria-hidden="true">
+                  <option value="type01">タイプ①</option>
+                  <option value="type02">タイプ②</option>
+                  <option value="type03">タイプ③</option>
+                  <option value="type04">タイプ④</option>
+                  <option value="type05">タイプ⑤</option>
+                  <option value="type06">タイプ⑥</option>
+                  <option value="type07">タイプ⑦</option>
+                  <option value="type08">タイプ⑧</option>
+                  <option value="type09">タイプ⑨</option>
+                  <option value="type10">タイプ⑩</option>
+                  <option value="type11">タイプ⑪</option>
+                  <option value="type12">タイプ⑫</option>
+                  <option value="type13">タイプ⑬</option>
+                  <option value="type14">タイプ⑭</option>
+                  <option value="type15">タイプ⑮</option>
+                </select>
                 <label class="preview-color-chip">
                   <span>アクセント</span>
                   <input id="accentColor" name="accentColor" type="color" form="cardForm" data-preview-color-control>
@@ -406,6 +405,10 @@
                 </label>
               </div>
               <p class="preview-color-note">色を変えると名刺の表裏にすぐ反映されます。</p>
+            </div>
+            <div class="style-chip-row">
+              <span class="style-chip-row-label" id="textStyleLabel">書式</span>
+              <div class="style-chip-strip" id="textStyleChips" role="radiogroup" aria-labelledby="textStyleLabel"></div>
             </div>
             <div class="preview-zoom-control" aria-label="プレビューの拡大表示">
               <div class="preview-zoom-head">
@@ -515,8 +518,8 @@
       </a>
     </div>
   </div>
-  <script src="./common-profile.js?v=20260704e"></script>
-  <script src="./oshi-script.js?v=20260704e"></script>
-  <script src="./mobile-preview.js?v=20260704e"></script>
+  <script src="./common-profile.js?v=20260709a"></script>
+  <script src="./oshi-script.js?v=20260709a"></script>
+  <script src="./mobile-preview.js?v=20260709a"></script>
 </body>
 </html>

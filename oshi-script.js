@@ -198,64 +198,79 @@ const themePalettes = {
 
 const textStylePresets = {
   type01: {
-    fontFamily: "'Yu Gothic', 'Yu Gothic UI', sans-serif",
-    labelFontFamily: "'Yu Gothic', 'Yu Gothic UI', sans-serif"
+    name: "ゴシック",
+    fontFamily: "'Noto Sans JP', sans-serif",
+    labelFontFamily: "'Noto Sans JP', sans-serif"
   },
   type02: {
-    fontFamily: "'Comic Sans MS', 'BIZ UDGothic', sans-serif",
-    labelFontFamily: "'Comic Sans MS', 'BIZ UDGothic', sans-serif"
+    name: "丸ゴシック",
+    fontFamily: "'Zen Maru Gothic', sans-serif",
+    labelFontFamily: "'Zen Maru Gothic', sans-serif"
   },
   type03: {
-    fontFamily: "'Yu Mincho', 'MS PMincho', serif",
-    labelFontFamily: "'Yu Mincho', 'MS PMincho', serif"
+    name: "明朝（細）",
+    fontFamily: "'Shippori Mincho', serif",
+    labelFontFamily: "'Shippori Mincho', serif"
   },
   type04: {
-    fontFamily: "Consolas, 'MS Gothic', monospace",
-    labelFontFamily: "Consolas, 'MS Gothic', monospace"
+    name: "ドット",
+    fontFamily: "'DotGothic16', sans-serif",
+    labelFontFamily: "'DotGothic16', sans-serif"
   },
   type05: {
-    fontFamily: "'Trebuchet MS', 'Meiryo', sans-serif",
-    labelFontFamily: "'Trebuchet MS', 'Meiryo', sans-serif"
+    name: "明朝",
+    fontFamily: "'Noto Serif JP', serif",
+    labelFontFamily: "'Noto Serif JP', serif"
   },
   type06: {
-    fontFamily: "Georgia, 'MS Mincho', serif",
-    labelFontFamily: "Georgia, 'MS Mincho', serif"
+    name: "ポップ太",
+    fontFamily: "'RocknRoll One', sans-serif",
+    labelFontFamily: "'RocknRoll One', sans-serif"
   },
   type07: {
-    fontFamily: "Verdana, 'UD Digi Kyokasho NP', 'BIZ UDGothic', sans-serif",
-    labelFontFamily: "Verdana, 'UD Digi Kyokasho NP', 'BIZ UDGothic', sans-serif"
+    name: "角ゴシック",
+    fontFamily: "'Zen Kaku Gothic New', sans-serif",
+    labelFontFamily: "'Zen Kaku Gothic New', sans-serif"
   },
   type08: {
-    fontFamily: "'Palatino Linotype', 'BIZ UDMincho Medium', serif",
-    labelFontFamily: "'Palatino Linotype', 'BIZ UDMincho Medium', serif"
+    name: "手書き楷書",
+    fontFamily: "'Klee One', cursive",
+    labelFontFamily: "'Klee One', cursive"
   },
   type09: {
-    fontFamily: "'Arial Black', 'MS PGothic', sans-serif",
-    labelFontFamily: "'Arial Black', 'MS PGothic', sans-serif"
+    name: "線ゴシック",
+    fontFamily: "'Stick', sans-serif",
+    labelFontFamily: "'Stick', sans-serif"
   },
   type10: {
-    fontFamily: "'Courier New', 'MS UI Gothic', monospace",
-    labelFontFamily: "'Courier New', 'MS UI Gothic', monospace"
+    name: "極太",
+    fontFamily: "'Dela Gothic One', sans-serif",
+    labelFontFamily: "'Dela Gothic One', sans-serif"
   },
   type11: {
-    fontFamily: "'Century Gothic', 'Meiryo UI', sans-serif",
-    labelFontFamily: "'Century Gothic', 'Meiryo UI', sans-serif"
+    name: "ラフ手書き",
+    fontFamily: "'Yusei Magic', sans-serif",
+    labelFontFamily: "'Yusei Magic', sans-serif"
   },
   type12: {
-    fontFamily: "'Times New Roman', 'MS PMincho', serif",
-    labelFontFamily: "'Times New Roman', 'MS PMincho', serif"
+    name: "まるかわ",
+    fontFamily: "'Hachi Maru Pop', cursive",
+    labelFontFamily: "'Hachi Maru Pop', cursive"
   },
   type13: {
-    fontFamily: "'Franklin Gothic Medium', 'BIZ UDPGothic', sans-serif",
-    labelFontFamily: "'Franklin Gothic Medium', 'BIZ UDPGothic', sans-serif"
+    name: "レトロ",
+    fontFamily: "'Kaisei Decol', serif",
+    labelFontFamily: "'Kaisei Decol', serif"
   },
   type14: {
-    fontFamily: "'Segoe UI', 'Yu Gothic UI', sans-serif",
-    labelFontFamily: "'Segoe UI', 'Yu Gothic UI', sans-serif"
+    name: "ポップ丸",
+    fontFamily: "'Mochiy Pop One', sans-serif",
+    labelFontFamily: "'Mochiy Pop One', sans-serif"
   },
   type15: {
-    fontFamily: "Impact, 'UD Digi Kyokasho NK', 'Arial Black', sans-serif",
-    labelFontFamily: "Impact, 'UD Digi Kyokasho NK', 'Arial Black', sans-serif"
+    name: "インパクト",
+    fontFamily: "'Reggae One', sans-serif",
+    labelFontFamily: "'Reggae One', sans-serif"
   }
 };
 
@@ -662,6 +677,7 @@ if (form) {
 }
 setupSocialLabelChoices();
 setupTextStylePreview();
+setupWebFontRerender();
 if (avatarInput) {
   avatarInput.addEventListener("change", handleAvatarUpload);
 }
@@ -804,6 +820,7 @@ function handleFieldChange(event) {
   updateLayoutControls();
   saveState();
   renderCard();
+  queueFontEnsureRender();
 }
 function handleAvatarUpload(event) {
   const file = event.target.files?.[0];
@@ -887,16 +904,19 @@ function handleBusinessBackgroundImageUpload(event, side) {
 }
 
 function downloadCard() {
-  renderCard();
-  const link = document.createElement("a");
-  const fileNameBase = sanitizeFileName(state.displayName || "profile-card");
-  const suffix = state.layoutMode === "business" ? "推し活用名刺カード" : "推し活用自己紹介カード";
-  link.download = `${fileNameBase}-${suffix}.png`;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  ensureActiveFontLoaded(collectCardText()).then(() => {
+    renderCard();
+    const link = document.createElement("a");
+    const fileNameBase = sanitizeFileName(state.displayName || "profile-card");
+    const suffix = state.layoutMode === "business" ? "推し活用名刺カード" : "推し活用自己紹介カード";
+    link.download = `${fileNameBase}-${suffix}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
 }
 
 async function shareCard() {
+  await ensureActiveFontLoaded(collectCardText());
   renderCard();
 
   const shareUrl = getShareUrl();
@@ -1107,6 +1127,9 @@ function loadState() {
     parsedState.useCommonProfile = Boolean(parsedState.useCommonProfile);
     parsedState.commonProfileOverrides = normalizeCommonProfileOverrides(parsedState.commonProfileOverrides);
     parsedState.textStylePreset = normalizeTextStylePreset(parsedState.textStylePreset);
+    if (parsedState.themePreset === "custom-image") {
+      parsedState.themePreset = "sunrise";
+    }
     parsedState.backgroundOverlayOpacity = normalizeBackgroundOverlayOpacity(parsedState.backgroundOverlayOpacity);
     parsedState.backgroundOverlayOpacityFront = normalizeBackgroundOverlayOpacity(
       parsedState.backgroundOverlayOpacityFront ?? parsedState.backgroundOverlayOpacity
@@ -1190,6 +1213,7 @@ function applyStateToForm(currentState) {
   syncRangeValueOutputs();
   syncPreviewAdjustPanel();
   syncSocialLabelChoices();
+  syncTextStyleChips();
 }
 
 function syncSocialLabelChoices() {
@@ -1235,43 +1259,128 @@ function setupSocialLabelChoices() {
 
 function setupTextStylePreview() {
   const select = document.getElementById("textStylePreset");
-  if (!select) {
+  const strip = document.getElementById("textStyleChips");
+  if (!select || !strip) {
     return;
   }
 
   const sampleText = "あいうえお";
-  const measureFontSize = 100;
-  const baseOptionFontSizeRem = 1.98;
-  const measureCanvas = document.createElement("canvas");
-  const measureCtx = measureCanvas.getContext("2d");
+  strip.textContent = "";
 
-  const entries = Array.from(select.options)
-    .map((option) => ({ option, preset: textStylePresets[option.value] }))
-    .filter(({ preset }) => Boolean(preset));
+  Array.from(select.options).forEach((option) => {
+    const preset = textStylePresets[option.value];
+    if (!preset) {
+      return;
+    }
 
-  const measurements = entries.map(({ preset }) => {
-    measureCtx.font = `700 ${measureFontSize}px ${preset.fontFamily}`;
-    const metrics = measureCtx.measureText(sampleText);
-    const ascent = metrics.actualBoundingBoxAscent || measureFontSize * 0.7;
-    const descent = metrics.actualBoundingBoxDescent || 0;
-    return ascent + descent;
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "style-chip";
+    chip.dataset.value = option.value;
+    chip.setAttribute("role", "radio");
+    chip.setAttribute("aria-checked", "false");
+
+    const sample = document.createElement("span");
+    sample.className = "style-chip-sample";
+    sample.textContent = sampleText;
+    sample.style.fontFamily = preset.fontFamily;
+
+    const label = document.createElement("span");
+    label.className = "style-chip-name";
+    label.textContent = preset.name || option.textContent;
+
+    chip.append(sample, label);
+    chip.addEventListener("click", () => {
+      if (select.value !== option.value) {
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      setActiveTextStyleChip(option.value, true);
+    });
+
+    strip.appendChild(chip);
   });
 
-  const averageHeight = measurements.reduce((sum, height) => sum + height, 0) / measurements.length;
+  setActiveTextStyleChip(select.value, false);
+}
 
-  entries.forEach(({ option, preset }, index) => {
-    option.style.fontFamily = preset.fontFamily;
+function setActiveTextStyleChip(value, scrollIntoView) {
+  const strip = document.getElementById("textStyleChips");
+  if (!strip) {
+    return;
+  }
 
-    const height = measurements[index];
-    const scale = height > 0 ? averageHeight / height : 1;
-    const clampedScale = Math.min(Math.max(scale, 0.75), 1.6);
-    option.style.fontSize = `${(baseOptionFontSizeRem * clampedScale).toFixed(3)}rem`;
-
-    if (!option.dataset.previewApplied) {
-      option.textContent = `あいうえお（${option.textContent}）`;
-      option.dataset.previewApplied = "true";
+  Array.from(strip.children).forEach((chip) => {
+    const active = chip.dataset.value === value;
+    chip.classList.toggle("is-active", active);
+    chip.setAttribute("aria-checked", active ? "true" : "false");
+    if (active && scrollIntoView) {
+      chip.scrollIntoView({ inline: "center", block: "nearest" });
     }
   });
+}
+
+function syncTextStyleChips() {
+  const select = document.getElementById("textStylePreset");
+  if (select) {
+    setActiveTextStyleChip(select.value, false);
+  }
+}
+
+function getPrimaryFontFamily(fontFamily) {
+  return String(fontFamily || "").split(",")[0].trim() || "sans-serif";
+}
+
+function collectCardText() {
+  let text = "あいうえおアイウエオ";
+  if (form) {
+    form.querySelectorAll("input, textarea").forEach((element) => {
+      if (
+        element instanceof HTMLInputElement
+        && ["file", "color", "range", "checkbox", "radio"].includes(element.type)
+      ) {
+        return;
+      }
+      if (typeof element.value === "string") {
+        text += element.value;
+      }
+    });
+  }
+  return text;
+}
+
+function ensureActiveFontLoaded(text) {
+  const preset = getTextStylePreset();
+  if (!preset || !document.fonts || typeof document.fonts.load !== "function") {
+    return Promise.resolve();
+  }
+
+  const family = getPrimaryFontFamily(preset.fontFamily);
+  const loadWeight = (weight) => (text
+    ? document.fonts.load(`${weight} 100px ${family}`, text)
+    : document.fonts.load(`${weight} 100px ${family}`));
+
+  return Promise.all([loadWeight(400), loadWeight(700)]).catch(() => {});
+}
+
+let fontEnsureTimer = null;
+function queueFontEnsureRender() {
+  if (fontEnsureTimer) {
+    clearTimeout(fontEnsureTimer);
+  }
+  fontEnsureTimer = setTimeout(() => {
+    ensureActiveFontLoaded(collectCardText()).then(() => renderCard());
+  }, 120);
+}
+
+function setupWebFontRerender() {
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => renderCard());
+    if (typeof document.fonts.addEventListener === "function") {
+      document.fonts.addEventListener("loadingdone", () => renderCard());
+    }
+  }
+  queueFontEnsureRender();
 }
 
 function syncManagedFileInputNames() {
@@ -1855,16 +1964,16 @@ function updateLayoutControls() {
     ? "名刺タイプでは横長の表・裏カードを上下で固定表示します。"
     : "通常カードではサイズを自由に選べます。";
   if (backgroundImageField) {
-    backgroundImageField.hidden = !isImageTheme(state.themePreset) || isBusiness;
+    backgroundImageField.hidden = isBusiness;
   }
   if (backgroundImageFrontField) {
-    backgroundImageFrontField.hidden = !isImageTheme(state.themePreset) || !isBusiness;
+    backgroundImageFrontField.hidden = !isBusiness;
   }
   if (backgroundImageBackField) {
-    backgroundImageBackField.hidden = !isImageTheme(state.themePreset) || !isBusiness;
+    backgroundImageBackField.hidden = !isBusiness;
   }
   if (backgroundOpacityControl) {
-    backgroundOpacityControl.hidden = !isImageTheme(state.themePreset);
+    backgroundOpacityControl.hidden = !isImageTheme();
   }
   syncBackgroundOpacityValue();
   syncBusinessBackgroundOpacityValues();
@@ -1885,6 +1994,9 @@ function renderCard() {
     ? renderBusinessCard()
     : renderStandardCard();
   syncSocialOverlay();
+  if (backgroundOpacityControl) {
+    backgroundOpacityControl.hidden = !isImageTheme();
+  }
 }
 
 function getCanvasSize() {
@@ -2072,8 +2184,8 @@ function renderBusinessCard() {
   const metaItems = collectMetaItems();
   const oshiItems = collectOshiItems();
   const checklistItems = collectChecklistItems();
-  const frontBackgroundImage = isImageTheme(state.themePreset) ? getBusinessSideBackgroundImage("front") : null;
-  const backBackgroundImage = isImageTheme(state.themePreset) ? getBusinessSideBackgroundImage("back") : null;
+  const frontBackgroundImage = getBusinessSideBackgroundImage("front");
+  const backBackgroundImage = getBusinessSideBackgroundImage("back");
   const cardWidth = canvas.width * 0.87;
   const cardHeight = cardWidth / 1.82;
   const gap = 72;
@@ -2897,7 +3009,7 @@ function drawBusinessFooterBand(context, footerMessage, x, y, width, height, acc
 }
 
 function drawBackground(context, width, height, themePreset, accentColor) {
-  if (isImageTheme(themePreset) && backgroundImage) {
+  if (backgroundImage) {
     drawImageToBox(
       context,
       backgroundImage,
@@ -4171,12 +4283,16 @@ function createColorGradientRaw(context, x, y, width, height, startColor, endCol
   return gradient;
 }
 
-function isImageTheme(themePreset) {
-  return themePreset === "custom-image";
+function isImageTheme() {
+  // 背景画像が設定されていれば、テーマ配色より優先して画像を表示する
+  if (state.layoutMode === "business") {
+    return Boolean(backgroundImage || backgroundImageFront || backgroundImageBack);
+  }
+  return Boolean(backgroundImage);
 }
 
 function themedAlpha(hex, alpha) {
-  if (!isImageTheme(state.themePreset)) {
+  if (!isImageTheme()) {
     return alpha;
   }
 
