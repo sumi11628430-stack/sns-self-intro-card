@@ -1620,9 +1620,32 @@ canvas {
     display: grid;
   }
 
+  /* スマホではパネルを約半分サイズ＋右上寄せにして、左上のプロフィール画像を隠さない（ドラッグ移動は引き続き可） */
+  .preview-adjust-panel {
+    left: auto;
+    right: 10px;
+    top: 10px;
+    width: min(180px, 58%);
+    padding: 8px 10px;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  .preview-adjust-panel .eyebrow {
+    display: none;
+  }
+
+  .preview-adjust-head {
+    gap: 2px;
+    padding-right: 26px;
+  }
+
+  .preview-adjust-head h3 {
+    font-size: 0.82rem;
+  }
+
   .preview-adjust-note {
-    max-width: none;
-    text-align: left;
+    display: none;
   }
 
   .preview-adjust-toolbar {
