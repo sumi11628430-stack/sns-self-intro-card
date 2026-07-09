@@ -3043,13 +3043,16 @@ function drawBusinessFooterBand(context, footerMessage, x, y, width, height, acc
 
 function drawBackground(context, width, height, themePreset, accentColor) {
   if (backgroundImage) {
+    const backgroundTransform = getBusinessBackgroundTransformState("front");
     drawImageToBox(
       context,
       backgroundImage,
       { x: 0, y: 0, w: width, h: height },
       {
         fitMode: "cover",
-        ...getBusinessBackgroundTransformState("front")
+        scalePercent: backgroundTransform.scale,
+        offsetX: backgroundTransform.offsetX,
+        offsetY: backgroundTransform.offsetY
       }
     );
     return;
