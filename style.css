@@ -1620,11 +1620,8 @@ canvas {
     display: grid;
   }
 
-  /* スマホではパネルを約半分サイズ＋右上寄せにして、左上のプロフィール画像を隠さない（ドラッグ移動は引き続き可） */
+  /* スマホではパネルを約半分サイズに（位置はJSで右上に配置。ドラッグ移動は引き続き可） */
   .preview-adjust-panel {
-    left: auto;
-    right: 10px;
-    top: 10px;
     width: min(180px, 58%);
     padding: 8px 10px;
     gap: 6px;

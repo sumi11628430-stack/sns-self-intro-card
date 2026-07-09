@@ -1590,6 +1590,15 @@ function resolvePreviewAdjustPosition(anchorButton = null) {
     top = buttonRect.bottom - frameRect.top + 8;
   }
 
+  // スマホ幅ではパネルを右上に寄せ、左上のプロフィール画像を隠さない
+  if (typeof window.matchMedia === "function" && window.matchMedia("(max-width: 760px)").matches) {
+    const estimatedWidth = Math.min(180, previewFrame.clientWidth * 0.58);
+    return {
+      left: Math.max(previewFrame.clientWidth - estimatedWidth - 12, 12),
+      top: 12
+    };
+  }
+
   return clampPreviewAdjustPosition({ left, top });
 }
 
