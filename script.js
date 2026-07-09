@@ -591,6 +591,7 @@ previewAdjustButtonLabels.avatar = "画像編集（プロフィール）";
 let state = constrainStateForPage(loadState());
 let avatarImage = null;
 let backgroundImage = null;
+let fontEnsureTimer = null;
 let backgroundImageFront = null;
 let backgroundImageBack = null;
 let lineQrImage = null;
@@ -1322,7 +1323,6 @@ function ensureActiveFontLoaded(text) {
   return Promise.all([loadWeight(400), loadWeight(700)]).catch(() => {});
 }
 
-let fontEnsureTimer = null;
 function queueFontEnsureRender() {
   if (fontEnsureTimer) {
     clearTimeout(fontEnsureTimer);
@@ -4232,10 +4232,6 @@ function themedAlpha(hex, alpha) {
   const opacity = normalizeBackgroundOverlayOpacity(state.backgroundOverlayOpacity);
   if (opacity >= 100) {
     return 0;
-  }
-
-  if (normalized === "#ffffff" && alpha >= 0.9) {
-    return alpha;
   }
 
   const fade = 1 - opacity / 100;
