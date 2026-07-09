@@ -1423,6 +1423,9 @@ canvas {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+  min-width: 0;
+  width: 100%;
+  flex-basis: 100%;
 }
 
 .style-chip-row-label {
@@ -1460,6 +1463,7 @@ canvas {
   color: var(--ink);
   cursor: pointer;
   scroll-snap-align: start;
+  overflow: hidden;
   transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -1468,9 +1472,13 @@ canvas {
 }
 
 .style-chip-sample {
+  max-width: 100%;
   font-size: 1.5rem;
   line-height: 1.15;
   color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .style-chip-name {

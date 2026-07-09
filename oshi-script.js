@@ -3538,19 +3538,23 @@ function drawTags(context, tags, x, y, maxWidth, accent, textColor) {
   const tagHeight = 46;
   const horizontalGap = 10;
   const verticalGap = 8;
+  const baseFontSize = 21;
   let cursorX = x;
   let cursorY = y;
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = getCanvasFont(21, 700, "body");
   const hotspotItems = [];
 
   tags.slice(0, 8).forEach((tag) => {
     const label = `#${tag}`;
-    const width = context.measureText(label).width + 30;
+    // 長いタグは折り返さず、フォントを縮めて1行に収める（帯の高さを一定に保ちグリッドを圧迫しない）
+    const availableTextWidth = Math.max(maxWidth - 30, 60);
+    const fontSize = fitSingleLineFont(context, label, baseFontSize, 12, availableTextWidth);
+    context.font = getCanvasFont(fontSize, 700, "body");
+    const width = Math.min(context.measureText(label).width + 30, maxWidth);
 
-    if (cursorX + width > x + maxWidth) {
+    if (cursorX > x && cursorX + width > x + maxWidth) {
       cursorX = x;
       cursorY += tagHeight + verticalGap;
     }
@@ -3745,12 +3749,23 @@ function drawFooter(context, footerMessage, x, y, width, height, accent, textCol
   context.fill();
 
   const content = clampText(footerMessage || "ここにひとことを入れましょう", 64);
-  const fontSize = fitSingleLineFont(context, content, 26, 18, Math.max(width - 48, 140));
+  const layout = fitWrappedTextBlock(
+    context,
+    content,
+    Math.max(width - 56, 140),
+    height - 16,
+    { maxFontSize: 25, minFontSize: 15, maxLines: 3, fontWeight: "700", role: "body" }
+  );
   context.fillStyle = textColor;
-  context.font = getCanvasFont(fontSize, 700, "body");
+  context.font = getCanvasFont(layout.fontSize, 700, "body");
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText(content, x + width / 2, y + height / 2 + 1);
+  const totalTextHeight = layout.lines.length * layout.lineHeight;
+  let lineY = y + height / 2 - totalTextHeight / 2 + layout.lineHeight / 2;
+  layout.lines.forEach((line) => {
+    context.fillText(line, x + width / 2, lineY);
+    lineY += layout.lineHeight;
+  });
   return {
     item: makeFocusItem("footerMessage", "ひとこと", x, y, width, height, 28)
   };

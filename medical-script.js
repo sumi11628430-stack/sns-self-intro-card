@@ -2157,9 +2157,10 @@ function renderStandardCard() {
       const scratchCtx = getScratchContext();
       const metaNaturalHeight = drawMetaInfo(scratchCtx, metaItems, 0, 0, metaWidth, accent, text).bottom;
       const socialNaturalHeight = measureStandardSocialQrGridHeight(socialLinks);
+      // メタは小さいまま、ソーシャル(2列)を少し拡大して高さを揃える（上段をコンパクトにして下部へ余白を回す）
       const targetHeight = Math.max(metaNaturalHeight, socialNaturalHeight);
-      metaScale = metaNaturalHeight > 0 ? clamp(targetHeight / metaNaturalHeight, 1, 1.25) : 1;
-      socialScale = socialNaturalHeight > 0 ? clamp(targetHeight / socialNaturalHeight, 1, 1.25) : 1;
+      metaScale = metaNaturalHeight > 0 ? clamp(targetHeight / metaNaturalHeight, 1, 1.15) : 1;
+      socialScale = socialNaturalHeight > 0 ? clamp(targetHeight / socialNaturalHeight, 1, 1.45) : 1;
     }
 
     const metaLayout = drawMetaInfo(ctx, metaItems, inner.x, sectionStart, metaWidth, accent, text, metaScale);
@@ -2204,14 +2205,21 @@ function renderStandardCard() {
 
   const checklistTop = tagsBottom + canvas.width * 0.026;
   const checklistFieldName = checklistGroups[0]?.items[0]?.key || "checkSameWelcome";
-  const checklistLayout = drawChecklistPanel(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName);
+  const footerHeight = canvas.height * 0.065;
+  const footerTop = inner.y + inner.h - footerHeight;
+  const gridTopGap = canvas.width * 0.026;
+  const gridBottomGap = canvas.width * 0.03;
+  // 闘病メモ（下段グリッド）に高さを確保し（各項目を縦に広めに）、チェックリストは残りに収まるよう自動圧縮する
+  const minGridHeight = canvas.height * 0.2;
+  const checklistMaxHeight = Math.max(
+    footerTop - gridBottomGap - minGridHeight - gridTopGap - checklistTop,
+    canvas.height * 0.12
+  );
+  const checklistLayout = drawChecklistPanel(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, checklistMaxHeight);
   const checklistBottom = checklistLayout.bottom;
   focusItems.push(...checklistLayout.items);
 
-  const footerHeight = canvas.height * 0.065;
-  const footerTop = inner.y + inner.h - footerHeight;
-  const gridTop = checklistBottom + canvas.width * 0.026;
-  const gridBottomGap = canvas.width * 0.03;
+  const gridTop = checklistBottom + gridTopGap;
   const gridHeight = Math.max(footerTop - gridBottomGap - gridTop, 0);
   const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, inner.x, gridTop, inner.w, gridHeight, accent, text);
   focusItems.push(...oshiGridLayout.items);
@@ -3332,11 +3340,13 @@ function drawSocialLinks(context, links, x, y, maxWidth, options = {}) {
 }
 
 function measureStandardSocialQrGridHeight(links, scale = 1) {
-  const rows = Math.min(links.length, 4);
-  if (!rows) {
+  const count = Math.min(links.length, 4);
+  if (!count) {
     return 0;
   }
 
+  const columns = count > 2 ? 2 : 1;
+  const rows = Math.ceil(count / columns);
   const rowGap = 12 * scale;
   const rowHeight = 46 * scale;
   return rows * rowHeight + Math.max(rows - 1, 0) * rowGap;
@@ -3349,7 +3359,7 @@ function drawStandardSocialQrGrid(context, links, x, y, width, accent, textColor
   }
 
   const visibleLinks = links.slice(0, 4);
-  const columns = 1;
+  const columns = visibleLinks.length > 2 ? 2 : 1;
   const rows = Math.ceil(visibleLinks.length / columns);
   const colGap = 14;
   const rowGap = 12 * scale;
@@ -3506,16 +3516,16 @@ function drawAddressRow(context, link, x, y, width, accent, labelText, scale = 1
 }
 
 function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor, scale = 1) {
-  const tagHeight = 52 * scale;
-  const horizontalGap = 12;
-  const verticalGap = 12 * scale;
-  const paddingX = 15 * scale;
+  const tagHeight = 42 * scale;
+  const horizontalGap = 10;
+  const verticalGap = 9 * scale;
+  const paddingX = 13 * scale;
   let cursorX = x;
   let cursorY = y;
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = getCanvasFont(22 * scale, 700, "body");
+  context.font = getCanvasFont(19 * scale, 700, "body");
 
   const hotspotItems = [];
 
@@ -3565,22 +3575,26 @@ function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor, scale =
 }
 
 function drawTags(context, tags, x, y, maxWidth, accent, textColor) {
-  const tagHeight = 54;
-  const horizontalGap = 12;
-  const verticalGap = 12;
+  const tagHeight = 44;
+  const horizontalGap = 10;
+  const verticalGap = 10;
+  const baseFontSize = 20;
   let cursorX = x;
   let cursorY = y;
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = getCanvasFont(24, 700, "body");
   const hotspotItems = [];
 
   tags.slice(0, 8).forEach((tag) => {
     const label = `#${tag}`;
-    const width = context.measureText(label).width + 30;
+    // 長いタグは折り返さず、フォントを縮めて1行に収める（帯の高さを一定に保ちグリッドを圧迫しない）
+    const availableTextWidth = Math.max(maxWidth - 30, 60);
+    const fontSize = fitSingleLineFont(context, label, baseFontSize, 12, availableTextWidth);
+    context.font = getCanvasFont(fontSize, 700, "body");
+    const width = Math.min(context.measureText(label).width + 30, maxWidth);
 
-    if (cursorX + width > x + maxWidth) {
+    if (cursorX > x && cursorX + width > x + maxWidth) {
       cursorX = x;
       cursorY += tagHeight + verticalGap;
     }
@@ -3602,45 +3616,67 @@ function drawTags(context, tags, x, y, maxWidth, accent, textColor) {
   };
 }
 
-function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, focusFieldName = "checkSameWelcome") {
+function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, focusFieldName = "checkSameWelcome", maxHeight = Infinity) {
   const paddingX = 20;
-  const paddingTop = 18;
-  const badgeHeight = 42;
-  const horizontalGap = 10;
-  const verticalGap = 10;
   const preparedGroups = groups.filter((group) => group.items.length);
-  const sectionLayouts = [];
-  let cursorY = y + paddingTop + 34;
 
-  context.textAlign = "left";
-  context.textBaseline = "middle";
-  context.font = getCanvasFont(18, 700, "body");
+  // 指定スケールでバッジ配置とパネル高さを計算（詰め込み時に縮小して収めるため）
+  const computeLayout = (scale) => {
+    const paddingTop = Math.round(18 * scale);
+    const badgeHeight = Math.max(Math.round(42 * scale), 24);
+    const horizontalGap = Math.max(Math.round(10 * scale), 6);
+    const verticalGap = Math.max(Math.round(10 * scale), 6);
+    const badgeFont = Math.max(Math.round(18 * scale), 12);
+    const titleFont = Math.max(Math.round(18 * scale), 12);
+    const headerFont = Math.max(Math.round(22 * scale), 14);
+    const topOffset = Math.round(34 * scale);
+    const headingGap = Math.round(28 * scale);
+    const groupGap = Math.round(18 * scale);
+    const badgePadX = Math.round(24 * scale);
+    const sectionLayouts = [];
+    let cursorY = y + paddingTop + topOffset;
 
-  preparedGroups.forEach((group) => {
-    const badges = [];
-    let cursorX = x + paddingX;
-    const headingY = cursorY;
-    let badgeY = headingY + 28;
+    context.font = getCanvasFont(badgeFont, 700, "body");
+    preparedGroups.forEach((group) => {
+      const badges = [];
+      let cursorX = x + paddingX;
+      const headingY = cursorY;
+      let badgeY = headingY + headingGap;
 
-    group.items.forEach((label) => {
-      const badgeWidth = Math.min(context.measureText(label).width + 24, maxWidth - paddingX * 2);
-      if (cursorX + badgeWidth > x + maxWidth - paddingX) {
-        cursorX = x + paddingX;
-        badgeY += badgeHeight + verticalGap;
-      }
+      group.items.forEach((label) => {
+        const badgeWidth = Math.min(context.measureText(label).width + badgePadX, maxWidth - paddingX * 2);
+        if (cursorX + badgeWidth > x + maxWidth - paddingX) {
+          cursorX = x + paddingX;
+          badgeY += badgeHeight + verticalGap;
+        }
 
-      badges.push({ label, x: cursorX, y: badgeY, width: badgeWidth });
-      cursorX += badgeWidth + horizontalGap;
+        badges.push({ label, x: cursorX, y: badgeY, width: badgeWidth });
+        cursorX += badgeWidth + horizontalGap;
+      });
+
+      sectionLayouts.push({ title: group.title, headingY, badges });
+      cursorY = badges.length
+        ? badges[badges.length - 1].y + badgeHeight + groupGap
+        : headingY + Math.round(30 * scale);
     });
 
-    sectionLayouts.push({ title: group.title, headingY, badges });
-    cursorY = badges.length
-      ? badges[badges.length - 1].y + badgeHeight + 18
-      : headingY + 30;
-  });
+    const panelHeight = preparedGroups.length ? cursorY - y + 2 : 112;
+    return { paddingTop, badgeHeight, badgeFont, titleFont, headerFont, sectionLayouts, panelHeight };
+  };
 
-  const panelHeight = preparedGroups.length ? cursorY - y + 2 : 112;
+  let layout = computeLayout(1);
+  if (preparedGroups.length && layout.panelHeight > maxHeight) {
+    for (let scale = 0.94; scale >= 0.5; scale -= 0.03) {
+      layout = computeLayout(scale);
+      if (layout.panelHeight <= maxHeight) {
+        break;
+      }
+    }
+  }
 
+  const { paddingTop, badgeHeight, badgeFont, titleFont, headerFont, sectionLayouts, panelHeight } = layout;
+
+  context.textAlign = "left";
   context.fillStyle = getAccentFill(context, x, y, maxWidth, panelHeight, 0.08, 0.14);
   roundRect(context, x, y, maxWidth, panelHeight, 24);
   context.fill();
@@ -3652,7 +3688,7 @@ function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, 
 
   context.fillStyle = hexToRgba(getLabelTextColor(), 0.78);
   context.textBaseline = "top";
-  context.font = getCanvasFont(22, 700, "label");
+  context.font = getCanvasFont(headerFont, 700, "label");
   context.fillText("チェックリスト", x + paddingX, y + paddingTop);
 
   if (!preparedGroups.length) {
@@ -3668,11 +3704,11 @@ function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, 
   sectionLayouts.forEach((group) => {
     context.fillStyle = hexToRgba(getLabelTextColor(), 0.76);
     context.textBaseline = "top";
-    context.font = getCanvasFont(18, 700, "label");
+    context.font = getCanvasFont(titleFont, 700, "label");
     context.fillText(group.title, x + paddingX, group.headingY);
 
     context.textBaseline = "middle";
-    context.font = getCanvasFont(18, 700, "body");
+    context.font = getCanvasFont(badgeFont, 700, "body");
     group.badges.forEach((badge) => {
       context.fillStyle = getAccentFill(context, badge.x, badge.y, badge.width, badgeHeight, 0.15, 0.22);
       roundRect(context, badge.x, badge.y, badge.width, badgeHeight, 999);
@@ -3775,12 +3811,23 @@ function drawFooter(context, footerMessage, x, y, width, height, accent, textCol
   context.fill();
 
   const content = clampText(footerMessage || "ここにひとことを入れましょう", 64);
-  const fontSize = fitSingleLineFont(context, content, 26, 18, Math.max(width - 48, 140));
+  const layout = fitWrappedTextBlock(
+    context,
+    content,
+    Math.max(width - 56, 140),
+    height - 16,
+    { maxFontSize: 25, minFontSize: 15, maxLines: 3, fontWeight: "700", role: "body" }
+  );
   context.fillStyle = textColor;
-  context.font = getCanvasFont(fontSize, 700, "body");
+  context.font = getCanvasFont(layout.fontSize, 700, "body");
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText(content, x + width / 2, y + height / 2 + 1);
+  const totalTextHeight = layout.lines.length * layout.lineHeight;
+  let lineY = y + height / 2 - totalTextHeight / 2 + layout.lineHeight / 2;
+  layout.lines.forEach((line) => {
+    context.fillText(line, x + width / 2, lineY);
+    lineY += layout.lineHeight;
+  });
   return {
     item: makeFocusItem("footerMessage", "ひとこと", x, y, width, height, 28)
   };
