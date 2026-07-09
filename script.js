@@ -1590,13 +1590,23 @@ function resolvePreviewAdjustPosition(anchorButton = null) {
     top = buttonRect.bottom - frameRect.top + 8;
   }
 
-  // スマホ幅ではパネルを右上に寄せ、左上のプロフィール画像を隠さない
+  const isBusiness = state.layoutMode === "business";
+
+  // 名刺(business)は画像が右にあるため左上へ、通常カードは画像が左上にあるため右上へ（スマホでプロフィール画像を隠さない）
   if (typeof window.matchMedia === "function" && window.matchMedia("(max-width: 760px)").matches) {
+    if (isBusiness) {
+      return clampPreviewAdjustPosition({ left: 12, top: 12 });
+    }
     const estimatedWidth = Math.min(180, previewFrame.clientWidth * 0.58);
     return {
       left: Math.max(previewFrame.clientWidth - estimatedWidth - 12, 12),
       top: 12
     };
+  }
+
+  // 名刺(business)はデスクトップでもプロフィール画像が右のため左側に配置する
+  if (isBusiness) {
+    return clampPreviewAdjustPosition({ left: 12, top: 12 });
   }
 
   return clampPreviewAdjustPosition({ left, top });
