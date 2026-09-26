@@ -481,3 +481,30 @@ button.card-link {
     padding: 22px;
   }
 }
+
+/* ---- 2026-09 改修：フォーマット選択を先頭に、完成見本つき／基本情報は折りたたみ ---- */
+.format-lead { margin: 26px 10px 0; font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+.format-card { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.format-card .format-sample {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 600 / 478;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 26px rgba(116, 80, 45, 0.14);
+  margin-bottom: 6px;
+}
+.format-card .card-link { margin-top: auto; align-self: flex-start; }
+.common-profile-details { margin-top: 26px; }
+.common-profile-details > summary { list-style: none; cursor: pointer; display: grid; gap: 6px; }
+.common-profile-details > summary::-webkit-details-marker { display: none; }
+.common-profile-summary-title { font-weight: 700; font-size: clamp(1.25rem, 2vw, 1.6rem); color: var(--ink); }
+.common-profile-summary-title::after { content: "  ＋ 開く"; font-size: .8rem; color: var(--muted); font-weight: 700; }
+.common-profile-details[open] .common-profile-summary-title::after { content: "  − 閉じる"; }
+.common-profile-summary-note { color: var(--muted); font-size: .92rem; line-height: 1.7; }
+.common-profile-details[open] > summary { margin-bottom: 18px; }
+.format-card .status-badge { align-self: flex-start; }
+.common-profile-summary-title::after { white-space: nowrap; }

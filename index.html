@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>自己紹介フォーマット選択</title>
-  <link rel="stylesheet" href="./hub.css?v=20260621c">
+  <link rel="stylesheet" href="./hub.css?v=20260926c">
 </head>
 <body class="hub-page">
   <div class="hub-shell">
@@ -17,10 +17,46 @@
       </p>
     </header>
 
-    <section class="common-profile-card">
+    <p class="format-lead">まずは作りたいカードを選んでください</p>
+    <main class="format-grid">
+      <a class="format-card daily-card" href="./daily-format.html">
+        <img class="format-sample" src="./samples/daily.webp" alt="日常用自己紹介カードの見本" loading="lazy">
+        <span class="status-badge">公開中</span>
+        <h2>日常用自己紹介フォーマット</h2>
+        <p>
+          普段のSNSで使いやすい自己紹介カードを、色・項目・表示内容まで自由にカスタマイズできます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+
+      <a class="format-card medical-card" href="./medical-format.html">
+        <img class="format-sample" src="./samples/medical.webp" alt="闘病用自己紹介カードの見本" loading="lazy">
+        <span class="status-badge">公開中</span>
+        <h2>闘病用自己紹介フォーマット</h2>
+        <p>
+          闘病中の自己紹介に合わせた専用フォーマットです。配慮事項やチェックリストも含めて、必要な情報をやさしく整理できます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+
+      <a class="format-card oshi-card" href="./oshi-format.html">
+        <img class="format-sample" src="./samples/oshi.webp" alt="推し活用自己紹介カードの見本" loading="lazy">
+        <span class="status-badge oshi-badge">公開中</span>
+        <h2>推し活用自己紹介フォーマット</h2>
+        <p>
+          推し、推し歴、同担スタンス、交流方針などをまとめて、推し活仲間に伝えやすい形へ整えられます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+    </main>
+
+    <details class="common-profile-card common-profile-details">
+      <summary class="common-profile-summary">
+        <span class="eyebrow">COMMON PROFILE（任意）</span>
+        <span class="common-profile-summary-title">基本情報をまとめて入れておく</span>
+        <span class="common-profile-summary-note">3つのフォーマットで同じ名前やSNSを使い回したい時だけ。タップで開きます</span>
+      </summary>
       <div class="common-profile-header">
-        <p class="eyebrow">COMMON PROFILE</p>
-        <h2>基本情報</h2>
         <p>
           トップページでも、名前からLINEまでの基本情報をまとめて入れられるようにしています。
           まずはここで共通の内容を整理してから、使いたいフォーマットへ進めます。
@@ -169,36 +205,7 @@
           </div>
         </div>
       </form>
-    </section>
-
-    <main class="format-grid">
-      <a class="format-card daily-card" href="./daily-format.html">
-        <span class="status-badge">公開中</span>
-        <h2>日常用自己紹介フォーマット</h2>
-        <p>
-          普段のSNSで使いやすい自己紹介カードを、色・項目・表示内容まで自由にカスタマイズできます。
-        </p>
-        <span class="card-link">このフォーマットを開く</span>
-      </a>
-
-      <a class="format-card medical-card" href="./medical-format.html">
-        <span class="status-badge">公開中</span>
-        <h2>闘病用自己紹介フォーマット</h2>
-        <p>
-          闘病中の自己紹介に合わせた専用フォーマットです。配慮事項やチェックリストも含めて、必要な情報をやさしく整理できます。
-        </p>
-        <span class="card-link">このフォーマットを開く</span>
-      </a>
-
-      <a class="format-card oshi-card" href="./oshi-format.html">
-        <span class="status-badge oshi-badge">公開中</span>
-        <h2>推し活用自己紹介フォーマット</h2>
-        <p>
-          推し、推し歴、同担スタンス、交流方針などをまとめて、推し活仲間に伝えやすい形へ整えられます。
-        </p>
-        <span class="card-link">このフォーマットを開く</span>
-      </a>
-    </main>
+    </details>
 
   <p style="margin:36px 0 6px;text-align:center;font-size:0.72rem;letter-spacing:0.04em;color:var(--muted,#617175);">Uniter-presents © 2025 A.T.L / 繋がりプロジェクト</p>
   </div>

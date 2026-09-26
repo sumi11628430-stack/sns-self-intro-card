@@ -3120,6 +3120,8 @@ function drawFrameAccent(context, safe, inner, currentState) {
 }
 
 function getAvatarDimensions(baseSize, avatarRatio) {
+  /* 枠は形（10種類）で選ぶため、縦横比は常に正方形 */
+  return { w: baseSize, h: baseSize };
   if (avatarRatio === "portrait") {
     return { w: baseSize * 0.82, h: baseSize * 1.18 };
   }
@@ -3136,7 +3138,7 @@ function drawAvatar(context, avatarBox, currentState, accent, textColor) {
   const cornerBase = Math.min(w, h);
   context.save();
   context.fillStyle = getAccentFill(context, avatarBox.x - 10, avatarBox.y - 10, w + 20, h + 20, 0.14, 0.24);
-  roundRect(context, avatarBox.x - 10, avatarBox.y - 10, w + 20, h + 20, cornerBase * 0.26);
+  beginAvatarPath(context, avatarBox.x - 10, avatarBox.y - 10, w + 20, h + 20, currentState.avatarShape);
   context.fill();
 
   beginAvatarPath(context, avatarBox.x, avatarBox.y, w, h, currentState.avatarShape);
@@ -3162,10 +3164,10 @@ function drawAvatar(context, avatarBox, currentState, accent, textColor) {
     context.fillRect(avatarBox.x, avatarBox.y, w, h);
 
     context.fillStyle = hexToRgba("#ffffff", 0.92);
-    context.font = getCanvasFont(Math.floor(cornerBase * 0.32), 700, "body");
+    context.font = getCanvasFont(Math.floor(cornerBase * 0.32 * getAvatarTextScale(currentState.avatarShape)), 700, "body");
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(getInitials(currentState.displayName), avatarBox.x + w / 2, avatarBox.y + h / 2 + 4);
+    context.fillText(getInitials(currentState.displayName), avatarBox.x + w / 2, avatarBox.y + h / 2 + 4 + getAvatarTextOffset(currentState.avatarShape, h));
   }
 
   context.restore();
@@ -3871,7 +3873,12 @@ function roundRect(context, x, y, width, height, radius) {
   context.closePath();
 }
 
+/* プロフィール画像の枠（10種類）。x,y,w,h の箱の中に形の輪郭を作る */
+const AVATAR_SHAPES = ["circle", "rounded", "diamond", "octagon", "heart", "star", "flower", "cloud", "drop", "arch"];
+
 function beginAvatarPath(context, x, y, w, h, avatarShape) {
+  const X = (u) => x + w * u;
+  const Y = (v) => y + h * v;
   context.beginPath();
 
   if (avatarShape === "rounded") {
@@ -3879,17 +3886,115 @@ function beginAvatarPath(context, x, y, w, h, avatarShape) {
     return;
   }
 
-  if (avatarShape === "blob") {
-    context.moveTo(x + w * 0.48, y + h * 0.03);
-    context.bezierCurveTo(x + w * 0.88, y - h * 0.02, x + w * 1.03, y + h * 0.3, x + w * 0.94, y + h * 0.56);
-    context.bezierCurveTo(x + w * 0.9, y + h * 0.92, x + w * 0.56, y + h * 1.05, x + w * 0.28, y + h * 0.94);
-    context.bezierCurveTo(x + w * 0.04, y + h * 0.84, x - w * 0.05, y + h * 0.5, x + w * 0.04, y + h * 0.22);
-    context.bezierCurveTo(x + w * 0.11, y + h * 0.05, x + w * 0.29, y - h * 0.02, x + w * 0.48, y + h * 0.03);
+  if (avatarShape === "diamond") {
+    context.moveTo(X(0.5), Y(0));
+    context.lineTo(X(1), Y(0.5));
+    context.lineTo(X(0.5), Y(1));
+    context.lineTo(X(0), Y(0.5));
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "octagon") {
+    const c = 0.2929;
+    context.moveTo(X(c), Y(0));
+    context.lineTo(X(1 - c), Y(0));
+    context.lineTo(X(1), Y(c));
+    context.lineTo(X(1), Y(1 - c));
+    context.lineTo(X(1 - c), Y(1));
+    context.lineTo(X(c), Y(1));
+    context.lineTo(X(0), Y(1 - c));
+    context.lineTo(X(0), Y(c));
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "heart") {
+    context.moveTo(X(0.5), Y(0.26));
+    context.bezierCurveTo(X(0.5), Y(0.2), X(0.4), Y(0.03), X(0.24), Y(0.03));
+    context.bezierCurveTo(X(0.04), Y(0.03), X(-0.02), Y(0.26), X(0.02), Y(0.4));
+    context.bezierCurveTo(X(0.08), Y(0.62), X(0.34), Y(0.8), X(0.5), Y(0.98));
+    context.bezierCurveTo(X(0.66), Y(0.8), X(0.92), Y(0.62), X(0.98), Y(0.4));
+    context.bezierCurveTo(X(1.02), Y(0.26), X(0.96), Y(0.03), X(0.76), Y(0.03));
+    context.bezierCurveTo(X(0.6), Y(0.03), X(0.5), Y(0.2), X(0.5), Y(0.26));
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "star") {
+    const cx = X(0.5), cy = Y(0.54);
+    for (let i = 0; i < 10; i += 1) {
+      const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+      const r = i % 2 === 0 ? 0.52 : 0.26;
+      const px = cx + Math.cos(angle) * w * r;
+      const py = cy + Math.sin(angle) * h * r;
+      if (i === 0) context.moveTo(px, py); else context.lineTo(px, py);
+    }
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "flower") {
+    const cx = X(0.5), cy = Y(0.5);
+    const steps = 180;
+    for (let i = 0; i <= steps; i += 1) {
+      const t = (i / steps) * Math.PI * 2;
+      const r = 0.5 * (0.62 + 0.38 * Math.abs(Math.sin((5 * t) / 2)));
+      const px = cx + Math.cos(t - Math.PI / 2) * w * r;
+      const py = cy + Math.sin(t - Math.PI / 2) * h * r;
+      if (i === 0) context.moveTo(px, py); else context.lineTo(px, py);
+    }
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "cloud") {
+    context.moveTo(X(0.16), Y(0.88));
+    context.lineTo(X(0.84), Y(0.88));
+    context.bezierCurveTo(X(1.02), Y(0.88), X(1.04), Y(0.56), X(0.86), Y(0.52));
+    context.bezierCurveTo(X(0.9), Y(0.28), X(0.66), Y(0.16), X(0.58), Y(0.32));
+    context.bezierCurveTo(X(0.54), Y(0.06), X(0.24), Y(0.06), X(0.28), Y(0.36));
+    context.bezierCurveTo(X(0.06), Y(0.3), X(-0.02), Y(0.56), X(0.12), Y(0.62));
+    context.bezierCurveTo(X(-0.04), Y(0.7), X(0.0), Y(0.88), X(0.16), Y(0.88));
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "drop") {
+    context.moveTo(X(0.5), Y(0));
+    context.bezierCurveTo(X(0.62), Y(0.18), X(0.92), Y(0.42), X(0.92), Y(0.64));
+    context.bezierCurveTo(X(0.92), Y(0.86), X(0.73), Y(1), X(0.5), Y(1));
+    context.bezierCurveTo(X(0.27), Y(1), X(0.08), Y(0.86), X(0.08), Y(0.64));
+    context.bezierCurveTo(X(0.08), Y(0.42), X(0.38), Y(0.18), X(0.5), Y(0));
+    context.closePath();
+    return;
+  }
+
+  if (avatarShape === "arch") {
+    const r = Math.min(w, h) * 0.08;
+    context.moveTo(X(0), Y(0.5));
+    context.arc(X(0.5), Y(0.5), w / 2, Math.PI, Math.PI * 2);
+    context.lineTo(X(1), Y(1) - r);
+    context.quadraticCurveTo(X(1), Y(1), X(1) - r, Y(1));
+    context.lineTo(X(0) + r, Y(1));
+    context.quadraticCurveTo(X(0), Y(1), X(0), Y(1) - r);
     context.closePath();
     return;
   }
 
   context.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+}
+
+/* 形ごとの、イニシャル文字の大きさ（細い形では文字がはみ出さないよう小さく） */
+function getAvatarTextScale(avatarShape) {
+  const scales = { star: 0.58, diamond: 0.78, heart: 0.85, flower: 0.88, cloud: 0.85, drop: 0.82 };
+  return scales[avatarShape] || 1;
+}
+
+/* 形ごとの、イニシャル文字を置く高さの補正（形の重心に合わせる） */
+function getAvatarTextOffset(avatarShape, h) {
+  const offsets = { heart: 0.06, star: 0.07, cloud: 0.1, drop: 0.14, arch: 0.04 };
+  return (offsets[avatarShape] || 0) * h;
 }
 
 function wrapLines(context, text, maxWidth) {
