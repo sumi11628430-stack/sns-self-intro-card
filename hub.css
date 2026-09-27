@@ -508,3 +508,140 @@ button.card-link {
 .common-profile-details[open] > summary { margin-bottom: 18px; }
 .format-card .status-badge { align-self: flex-start; }
 .common-profile-summary-title::after { white-space: nowrap; }
+
+/* ---- 2026-09 サイト名ロゴ「ハロカ」：1文字ずつ紙のカードをマスキングテープで貼った手描き風 ----
+   開いた時にカードが1枚ずつ落ちてきて貼られ（ぺたっ）、その後はテープを支点にゆらゆら揺れ続ける */
+.haroka-filter { position: absolute; width: 0; height: 0; }
+.haroka-logo { --s: 1; margin: 0; display: inline-flex; flex-direction: column; align-items: center; max-width: none; }
+.haroka-cards { display: flex; gap: calc(14px * var(--s)); padding-top: calc(10px * var(--s)); filter: url(#haroka-crayon); }
+.haroka-card {
+  --r: 0deg; --y: 0px;
+  width: calc(112px * var(--s)); height: calc(134px * var(--s));
+  border-radius: calc(14px * var(--s));
+  background: #fff;
+  box-shadow: 3px 5px 0 rgba(120, 90, 60, 0.18);
+  display: flex; align-items: center; justify-content: center;
+  font: calc(92px * var(--s)) / 1 "Hachi Maru Pop", "Yu Gothic", sans-serif;
+  position: relative;
+  transform-origin: 50% 0;
+  transform: rotate(var(--r)) translateY(var(--y));
+  opacity: 0;
+  animation:
+    haroka-stick 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) var(--d) forwards,
+    haroka-sway 3.2s ease-in-out calc(var(--d) + 0.7s + var(--p)) infinite;
+}
+.haroka-card::before {
+  content: ""; position: absolute; z-index: 2;
+  top: calc(-9px * var(--s)); left: 50%;
+  width: calc(44px * var(--s)); height: calc(16px * var(--s)); margin-left: calc(-22px * var(--s));
+  background: rgba(240, 190, 120, 0.6);
+  transform: rotate(-4deg); opacity: 0;
+  animation: haroka-tape 0.25s ease-out calc(var(--d) + 0.45s) forwards;
+}
+.haroka-card.k1 { --r: -7deg; --d: 0.15s; --p: 0s; color: #e98a7a; border: 3px solid #f2b8ac; }
+.haroka-card.k2 { --r: 3deg; --y: calc(10px * var(--s)); --d: 0.55s; --p: 0.4s; color: #6fae9a; border: 3px solid #a9d3c4; }
+.haroka-card.k3 { --r: -2deg; --d: 0.95s; --p: 0.8s; color: #e8a93c; border: 3px solid #f1cf8e; }
+.haroka-tag { margin-top: calc(18px * var(--s)); font: 400 calc(20px * var(--s)) / 1.4 "Yomogi", "Yu Gothic", sans-serif; letter-spacing: 0.12em; color: #9b8471; }
+@keyframes haroka-stick {
+  0% { opacity: 0; transform: translateY(-60px) rotate(calc(var(--r) * -3)) scale(1.25); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: rotate(var(--r)) translateY(var(--y)) scale(1); }
+}
+@keyframes haroka-sway {
+  0%, 100% { transform: rotate(var(--r)) translateY(var(--y)); }
+  25% { transform: rotate(calc(var(--r) - 3deg)) translateY(var(--y)); }
+  75% { transform: rotate(calc(var(--r) + 3deg)) translateY(var(--y)); }
+}
+@keyframes haroka-tape { from { opacity: 0; transform: rotate(-4deg) scaleX(0.2); } to { opacity: 1; transform: rotate(-4deg) scaleX(1); } }
+@media (max-width: 680px) { .haroka-logo { --s: 0.72; } }
+@media (prefers-reduced-motion: reduce) {
+  .haroka-card, .haroka-card::before { animation: none; opacity: 1; }
+}
+
+/* ---- ヒーロー右側：基本情報の入口（先に入れておきたい人向け） ---- */
+.hub-hero { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 22px 40px; }
+.hero-main { flex: 1 1 520px; min-width: 0; }
+.hero-common {
+  flex: 0 1 340px; margin-top: 8px; padding: 20px 22px 18px;
+  background: #fffdf7; border: 2.5px dashed #d9c4a6; border-radius: 24px;
+  box-shadow: 0 10px 26px rgba(116, 80, 45, 0.1);
+  transform: rotate(1.2deg);
+}
+.hero-common p { margin: 0; }
+.hero-common-step { font: 400 0.95rem/1.4 "Yomogi", "Yu Gothic", sans-serif; color: #9b8471; letter-spacing: 0.08em; }
+.hero-common-title { margin-top: 6px !important; font-weight: 700; font-size: 1.2rem; line-height: 1.5; color: var(--ink); }
+.hero-common-status { margin-top: 10px !important; font-size: 0.9rem; color: var(--muted); }
+.hero-common-status.is-filled { color: #3f8f73; font-weight: 700; }
+.hero-common-button {
+  margin-top: 12px; width: 100%; padding: 12px 16px; border: 0; border-radius: 999px; cursor: pointer;
+  font: 700 1rem/1.3 "Yu Gothic", "Hiragino Sans", "Meiryo", sans-serif; color: #fff; background: #e98a7a;
+  box-shadow: 0 4px 0 #cf6f60;
+}
+.hero-common-button:hover { background: #ee9a8b; }
+.hero-common-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #cf6f60; }
+.hero-common-note { margin-top: 12px !important; font-size: 0.8rem; line-height: 1.7; color: var(--muted); }
+.common-profile-details { scroll-margin-top: 16px; }
+@media (max-width: 680px) {
+  .hero-common { flex-basis: 100%; transform: none; }
+}
+
+/* 真ん中の「基本情報をまとめて入れておく」の帯は出さず、右上の入口ボタンで開いた時だけ入力欄を出す */
+.common-profile-details > summary { display: none; }
+.common-profile-details:not([open]) { display: none; }
+.common-profile-head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.common-profile-close, .common-profile-done {
+  border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; background: #fff; color: var(--ink);
+  font: 700 0.9rem/1.3 "Yu Gothic", "Hiragino Sans", "Meiryo", sans-serif; padding: 8px 16px;
+}
+.common-profile-done { display: block; margin: 22px auto 0; padding: 12px 24px; color: #fff; background: #e98a7a; border: 0; box-shadow: 0 4px 0 #cf6f60; }
+.format-lead { scroll-margin-top: 16px; }
+
+/* ---- トップのメイン画像（誰でもウェルカムな自己紹介の輪）。ふちは紙になじむようにぼかす ---- */
+.hero-welcome { margin: 0 auto; max-width: 920px; }
+.hero-welcome img {
+  display: block; width: 100%; height: auto;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+  mask-composite: intersect;
+}
+@media (max-width: 680px) { .hero-welcome { margin: 0 -6px; } }
+
+/* ---- フォーマットごとのワンポイントイラスト（完成見本の右下からのぞくシール風） ---- */
+.format-sample-wrap { position: relative; display: block; margin-bottom: 22px; }
+.format-sample-wrap .format-sample { margin-bottom: 0; }
+.format-illust {
+  position: absolute; right: -8px; bottom: -34px; width: 36%; height: auto;
+  filter: drop-shadow(0 6px 10px rgba(116, 80, 45, 0.18));
+  transform: rotate(3deg); transition: transform 0.25s ease;
+  pointer-events: none;
+}
+.format-illust-medical { width: 44%; right: -10px; bottom: -26px; }
+.format-illust-oshi { width: 30%; }
+.format-card:hover .format-illust { transform: rotate(-2deg) translateY(-4px); }
+
+/* ---- 入口：「ハロカ」だけの画面（止まった状態）。押すと消えて、選択画面のロゴが降ってくる＋ドミソが鳴る ---- */
+/* 入口を出さない時（2回目以降）は非表示。消える途中（is-leaving）はふわっと薄くなるまで表示を続ける */
+html:not(.haroka-gate-open) .haroka-gate:not(.is-leaving) { display: none; }
+.haroka-gate {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 236, 213, 0.9), transparent 34%),
+    radial-gradient(circle at 82% 80%, rgba(218, 230, 223, 0.8), transparent 36%),
+    #fbf5e8;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.haroka-gate.is-leaving { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+.haroka-gate-open body { overflow: hidden; }
+.haroka-logo-static { --s: 1.35; }
+.haroka-logo-static .haroka-card, .haroka-logo-static .haroka-card::before { opacity: 1; animation: none; }
+.haroka-gate-hint {
+  margin: 26px 0 0; font: 400 1.25rem/1.4 "Yomogi", "Yu Gothic", sans-serif; letter-spacing: 0.14em; color: #8a7461;
+  animation: haroka-hint-blink 2.2s ease-in-out infinite;
+}
+@keyframes haroka-hint-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+/* 入口が出ている間は、選択画面のロゴを降らせずに待たせる（入口を消した瞬間に降り始める） */
+.haroka-gate-open .hub-hero .haroka-card,
+.haroka-gate-open .hub-hero .haroka-card::before { animation: none; }
+@media (max-width: 680px) { .haroka-logo-static { --s: 0.95; } }

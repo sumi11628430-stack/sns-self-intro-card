@@ -3,63 +3,65 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>自己紹介フォーマット選択</title>
-  <link rel="stylesheet" href="./hub.css?v=20260926c">
+  <title>ハロカ｜はじめましてのプロフカード</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&family=Yomogi&display=swap">
+  <link rel="stylesheet" href="./hub.css?v=20260927g">
+  <script>
+    /* 入口（「ハロカ」だけの画面）は、この訪問で初めてトップを開いた時だけ出す */
+    try { if (!sessionStorage.getItem("haroka_gate_seen")) document.documentElement.classList.add("haroka-gate-open"); }
+    catch (e) { document.documentElement.classList.add("haroka-gate-open"); }
+  </script>
 </head>
 <body class="hub-page">
+  <div class="haroka-gate" id="harokaGate" role="button" tabindex="0" aria-label="ハロカをはじめる">
+    <div class="haroka-logo haroka-logo-static" aria-hidden="true">
+      <span class="haroka-cards"><span class="haroka-card k1">ハ</span><span class="haroka-card k2">ロ</span><span class="haroka-card k3">カ</span></span>
+      <span class="haroka-tag">はじめましての プロフカード</span>
+    </div>
+    <p class="haroka-gate-hint">タップしてはじめる</p>
+  </div>
   <div class="hub-shell">
     <header class="hub-hero">
-      <p class="eyebrow">PROFILE FORMAT HUB</p>
-      <h1>自己紹介なので自由に作りたい<br>プロフカード</h1>
+      <div class="hero-main">
+      <h1 class="haroka-logo" aria-label="ハロカ はじめましてのプロフカード">
+        <span class="haroka-cards" aria-hidden="true"><span class="haroka-card k1">ハ</span><span class="haroka-card k2">ロ</span><span class="haroka-card k3">カ</span></span>
+        <span class="haroka-tag" aria-hidden="true">はじめましての プロフカード</span>
+      </h1>
+      <svg class="haroka-filter" width="0" height="0" aria-hidden="true"><filter id="haroka-crayon"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter></svg>
       <p class="lead">
-        先に使いたいフォーマットを選んでから、それぞれのページへ進めます。
-        各ページの中で、SNS用カードと印刷して使える名刺を分けて作れる形へ整理していきます。
+        3つのカード（日常用・闘病用・推し活用）で同じ名前やSNSを使うなら、先に基本情報を入れておくと便利です。
+        そのあと作りたいカードを選ぶと、SNS用カードと印刷して使える名刺を作れます。
       </p>
+      </div>
+      <aside class="hero-common" aria-label="基本情報">
+        <p class="hero-common-step">① はじめに（任意）</p>
+        <p class="hero-common-title">3つのカードで使い回す<br>基本情報</p>
+        <p class="hero-common-status" id="heroCommonStatus">まだ入力していません</p>
+        <button type="button" class="hero-common-button" id="heroCommonOpen">基本情報を入力する</button>
+        <p class="hero-common-note">各カードのページで「トップページの基本情報を反映させる」にチェックを入れると、ここで入れた内容が入ります。</p>
+      </aside>
     </header>
 
-    <p class="format-lead">まずは作りたいカードを選んでください</p>
-    <main class="format-grid">
-      <a class="format-card daily-card" href="./daily-format.html">
-        <img class="format-sample" src="./samples/daily.webp" alt="日常用自己紹介カードの見本" loading="lazy">
-        <span class="status-badge">公開中</span>
-        <h2>日常用自己紹介フォーマット</h2>
-        <p>
-          普段のSNSで使いやすい自己紹介カードを、色・項目・表示内容まで自由にカスタマイズできます。
-        </p>
-        <span class="card-link">このフォーマットを開く</span>
-      </a>
+    <figure class="hero-welcome">
+      <img src="./images/hero-welcome.webp" srcset="./images/hero-welcome-900.webp 900w, ./images/hero-welcome.webp 1536w" sizes="(max-width: 920px) 100vw, 920px" width="1536" height="1024" alt="人、動物、ロボット、空想の生き物たちが、名刺交換やスマホ、パソコン、スケッチブックなど思い思いのやり方で自己紹介し合っている手描きの絵">
+    </figure>
 
-      <a class="format-card medical-card" href="./medical-format.html">
-        <img class="format-sample" src="./samples/medical.webp" alt="闘病用自己紹介カードの見本" loading="lazy">
-        <span class="status-badge">公開中</span>
-        <h2>闘病用自己紹介フォーマット</h2>
-        <p>
-          闘病中の自己紹介に合わせた専用フォーマットです。配慮事項やチェックリストも含めて、必要な情報をやさしく整理できます。
-        </p>
-        <span class="card-link">このフォーマットを開く</span>
-      </a>
-
-      <a class="format-card oshi-card" href="./oshi-format.html">
-        <img class="format-sample" src="./samples/oshi.webp" alt="推し活用自己紹介カードの見本" loading="lazy">
-        <span class="status-badge oshi-badge">公開中</span>
-        <h2>推し活用自己紹介フォーマット</h2>
-        <p>
-          推し、推し歴、同担スタンス、交流方針などをまとめて、推し活仲間に伝えやすい形へ整えられます。
-        </p>
-        <span class="card-link">このフォーマットを開く</span>
-      </a>
-    </main>
-
-    <details class="common-profile-card common-profile-details">
+    <details class="common-profile-card common-profile-details" id="commonProfile">
       <summary class="common-profile-summary">
-        <span class="eyebrow">COMMON PROFILE（任意）</span>
+        <span class="eyebrow">① 基本情報（任意）</span>
         <span class="common-profile-summary-title">基本情報をまとめて入れておく</span>
         <span class="common-profile-summary-note">3つのフォーマットで同じ名前やSNSを使い回したい時だけ。タップで開きます</span>
       </summary>
       <div class="common-profile-header">
+        <div class="common-profile-head-row">
+          <h2>① 基本情報（任意）</h2>
+          <button type="button" class="common-profile-close" id="commonProfileClose">閉じる</button>
+        </div>
         <p>
-          トップページでも、名前からLINEまでの基本情報をまとめて入れられるようにしています。
-          まずはここで共通の内容を整理してから、使いたいフォーマットへ進めます。
+          名前からSNSまで、3つのカードで共通に使う内容を入れておけます。
+          入れた内容は、このブラウザに自動で保存されます。
         </p>
       </div>
 
@@ -205,11 +207,57 @@
           </div>
         </div>
       </form>
+      <button type="button" class="common-profile-done" id="commonProfileDone">入力できたら ② 作りたいカードを選ぶ ↓</button>
     </details>
+
+    <p class="format-lead" id="formatLead">② 作りたいカードを選んでください</p>
+    <main class="format-grid">
+      <a class="format-card daily-card" href="./daily-format.html">
+        <span class="format-sample-wrap">
+          <img class="format-sample" src="./samples/daily.webp" alt="日常用自己紹介カードの見本" loading="lazy">
+          <img class="format-illust format-illust-daily" src="./images/fmt_daily.webp" alt="カフェで手を振る人と眠る猫のイラスト" loading="lazy">
+        </span>
+        <span class="status-badge">公開中</span>
+        <h2>日常用自己紹介フォーマット</h2>
+        <p>
+          普段のSNSで使いやすい自己紹介カードを、色・項目・表示内容まで自由にカスタマイズできます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+
+      <a class="format-card medical-card" href="./medical-format.html">
+        <span class="format-sample-wrap">
+          <img class="format-sample" src="./samples/medical.webp" alt="闘病用自己紹介カードの見本" loading="lazy">
+          <img class="format-illust format-illust-medical" src="./images/fmt_medical.webp" alt="毛布にくるまり温かい飲み物でひと休みする人と、手紙を運ぶ小鳥のイラスト" loading="lazy">
+        </span>
+        <span class="status-badge">公開中</span>
+        <h2>闘病用自己紹介フォーマット</h2>
+        <p>
+          闘病中の自己紹介に合わせた専用フォーマットです。配慮事項やチェックリストも含めて、必要な情報をやさしく整理できます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+
+      <a class="format-card oshi-card" href="./oshi-format.html">
+        <span class="format-sample-wrap">
+          <img class="format-sample" src="./samples/oshi.webp" alt="推し活用自己紹介カードの見本" loading="lazy">
+          <img class="format-illust format-illust-oshi" src="./images/fmt_oshi.webp" alt="ペンライトとハートのうちわを掲げて推しを応援する人のイラスト" loading="lazy">
+        </span>
+        <span class="status-badge oshi-badge">公開中</span>
+        <h2>推し活用自己紹介フォーマット</h2>
+        <p>
+          推し、推し歴、同担スタンス、交流方針などをまとめて、推し活仲間に伝えやすい形へ整えられます。
+        </p>
+        <span class="card-link">このフォーマットを開く</span>
+      </a>
+    </main>
+
 
   <p style="margin:36px 0 6px;text-align:center;font-size:0.72rem;letter-spacing:0.04em;color:var(--muted,#617175);">Uniter-presents © 2025 A.T.L / 繋がりプロジェクト</p>
   </div>
   <script src="./common-profile.js?v=20260621f"></script>
   <script src="./hub.js?v=20260621e"></script>
+  <script src="./hub-hero.js?v=20260927b"></script>
+  <script src="./haroka-gate.js?v=20260927a"></script>
 </body>
 </html>

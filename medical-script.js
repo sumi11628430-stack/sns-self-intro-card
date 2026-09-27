@@ -41,7 +41,7 @@ const defaultState = {
   surfaceColorEnd: "#fbfffd",
   labelTextColor: "#1b2326",
   textColor: "#1b2326",
-  textStylePreset: "type01",
+  textStylePreset: "type02",
   diagnosis: "自律神経の不調 / 不安障害",
   careHistory: "心療内科へ通院中 / 通院は月1回",
   treatment: "服薬 / 生活リズム調整 / カウンセリング",
@@ -197,6 +197,46 @@ const themePalettes = {
   }
 };
 
+/* 手描きイラストの背景テーマ（全面に小さな絵を散らした柄なので、どの縦横比で切り抜いても成立する）。
+   選ばれた時だけ読み込み、読み込めたらカードを描き直す。読み込み中は朝焼けの配色で仮表示 */
+const themeIllustrations = {
+  "illust-sky": "./images/themes/sky.webp",
+  "illust-night": "./images/themes/night.webp",
+  "illust-sakura": "./images/themes/sakura.webp",
+  "illust-oshi": "./images/themes/oshi.webp",
+  "illust-meadow": "./images/themes/meadow.webp",
+  "illust-sea": "./images/themes/sea.webp",
+  "illust-autumn": "./images/themes/autumn.webp",
+  "illust-winter": "./images/themes/winter.webp",
+  "illust-wagara": "./images/themes/wagara.webp",
+  "illust-paws": "./images/themes/paws.webp",
+  "illust-sweets": "./images/themes/sweets.webp",
+  "illust-letters": "./images/themes/letters.webp"
+};
+const themeIllustrationCache = {};
+
+function isIllustrationTheme(themePreset) {
+  return Object.prototype.hasOwnProperty.call(themeIllustrations, themePreset);
+}
+
+function getThemeIllustration(themePreset) {
+  if (!isIllustrationTheme(themePreset)) {
+    return null;
+  }
+  let entry = themeIllustrationCache[themePreset];
+  if (!entry) {
+    const image = new Image();
+    entry = { image, ready: false };
+    themeIllustrationCache[themePreset] = entry;
+    image.onload = () => {
+      entry.ready = true;
+      renderCard();
+    };
+    image.src = themeIllustrations[themePreset];
+  }
+  return entry.ready ? entry.image : null;
+}
+
 const textStylePresets = {
   type01: {
     name: "ゴシック",
@@ -229,9 +269,9 @@ const textStylePresets = {
     labelFontFamily: "'RocknRoll One', sans-serif"
   },
   type07: {
-    name: "角ゴシック",
-    fontFamily: "'Zen Kaku Gothic New', sans-serif",
-    labelFontFamily: "'Zen Kaku Gothic New', sans-serif"
+    name: "フチ文字",
+    fontFamily: "'Rampart One', sans-serif",
+    labelFontFamily: "'Rampart One', sans-serif"
   },
   type08: {
     name: "手書き楷書",
@@ -298,7 +338,10 @@ function normalizeTextStylePreset(value) {
     return legacyPresetMap[value];
   }
 
-  return textStylePresets[value] ? value : defaultState.textStylePreset;
+  /* 選択肢（書式の10種類）に無い書式は、初期の書式（丸ゴシック）にそろえる */
+  const select = document.getElementById("textStylePreset");
+  const selectable = !select || Array.from(select.options).some((option) => option.value === value);
+  return textStylePresets[value] && selectable ? value : defaultState.textStylePreset;
 }
 
 const sizePresets = {
@@ -2043,7 +2086,13 @@ function renderCard() {
   previewSizeLabel.textContent = size.label;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBackground(ctx, canvas.width, canvas.height, state.themePreset, state.accentColor);
+  if (state.layoutMode === "business") {
+    /* 名刺（印刷用）は、切り取る名刺の外側を無地の白にする（色や飾りを印刷しない） */
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else {
+    drawBackground(ctx, canvas.width, canvas.height, state.themePreset, state.accentColor);
+  }
 
   socialOverlayItems = state.layoutMode === "business"
     ? renderBusinessCard()
@@ -2225,13 +2274,35 @@ function renderStandardCard() {
     footerTop - gridBottomGap - minGridHeight - gridTopGap - checklistTop,
     canvas.height * 0.12
   );
-  const checklistLayout = drawChecklistPanel(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, checklistMaxHeight);
-  const checklistBottom = checklistLayout.bottom;
-  focusItems.push(...checklistLayout.items);
+  /* 正方形サイズなどで、チェックリストを縮めても下段の枠の高さが足りない時は、
+     チェックリストを右、闘病メモの枠を左に横並びにする（枠がつぶれて文字が重なるのを防ぐ） */
+  let useSideBySide = false;
+  if (checklistItems.length && oshiItems.length) {
+    const stackedBottom = drawChecklistPanel(
+      getScratchContext(), checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, checklistMaxHeight
+    ).bottom;
+    useSideBySide = footerTop - gridBottomGap - (stackedBottom + gridTopGap) < minGridHeight;
+  }
 
-  const gridTop = checklistBottom + gridTopGap;
+  let gridTop;
+  let gridWidth = inner.w;
+  if (useSideBySide) {
+    const columnGap = canvas.width * 0.016;
+    const checklistWidth = inner.w * 0.44;
+    const sideHeight = footerTop - gridBottomGap - checklistTop;
+    const checklistLayout = drawChecklistPanel(
+      ctx, checklistItems, inner.x + inner.w - checklistWidth, checklistTop, checklistWidth, accent, text, checklistFieldName, sideHeight
+    );
+    focusItems.push(...checklistLayout.items);
+    gridWidth = inner.w - checklistWidth - columnGap;
+    gridTop = checklistTop + canvas.width * 0.012;
+  } else {
+    const checklistLayout = drawChecklistPanel(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, checklistMaxHeight);
+    focusItems.push(...checklistLayout.items);
+    gridTop = checklistLayout.bottom + gridTopGap;
+  }
   const gridHeight = Math.max(footerTop - gridBottomGap - gridTop, 0);
-  const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, inner.x, gridTop, inner.w, gridHeight, accent, text);
+  const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, inner.x, gridTop, gridWidth, gridHeight, accent, text);
   focusItems.push(...oshiGridLayout.items);
   const footerLayout = drawFooter(ctx, state.footerMessage, inner.x, footerTop, inner.w, footerHeight, accent, text);
   focusItems.push(footerLayout.item);
@@ -2271,10 +2342,8 @@ function renderBusinessCard() {
 }
 
 function drawBusinessCardShell(context, box, accent, surfaceColor, frameStyle, backgroundImageForSide = null, side = "front") {
+  /* 印刷すると灰色に出るため、名刺の影は付けない */
   context.save();
-  context.shadowColor = "rgba(78, 51, 28, 0.16)";
-  context.shadowBlur = 38;
-  context.shadowOffsetY = 18;
   context.fillStyle = getRawSurfaceFill(context, box.x, box.y, box.w, box.h, 0.96);
   roundRect(context, box.x, box.y, box.w, box.h, 36);
   context.fill();
@@ -2283,11 +2352,23 @@ function drawBusinessCardShell(context, box, accent, surfaceColor, frameStyle, b
   if (backgroundImageForSide) {
     drawBusinessCardBackgroundImage(context, box, backgroundImageForSide, getBusinessBackgroundTransformState(side));
     drawBusinessBackgroundOverlay(context, box, side);
+  } else {
+    /* 自分の画像が無い時は、手描きイラストの背景テーマを名刺の中にも敷く */
+    const illustration = getThemeIllustration(state.themePreset);
+    if (illustration) {
+      context.save();
+      roundRect(context, box.x, box.y, box.w, box.h, 36);
+      context.clip();
+      drawImageToBox(context, illustration, box, { fitMode: "cover" });
+      context.restore();
+      drawBusinessBackgroundOverlay(context, box, side);
+    }
   }
 
+  /* ハサミで切る目安の、細い輪郭線 */
   context.save();
-  context.strokeStyle = hexToRgba("#ffffff", 0.7);
-  context.lineWidth = 2;
+  context.strokeStyle = "rgba(120, 110, 100, 0.5)";
+  context.lineWidth = 1.5;
   roundRect(context, box.x, box.y, box.w, box.h, 36);
   context.stroke();
   context.restore();
@@ -3085,6 +3166,12 @@ function drawBackground(context, width, height, themePreset, accentColor) {
     return;
   }
 
+  const illustration = getThemeIllustration(themePreset);
+  if (illustration) {
+    drawImageToBox(context, illustration, { x: 0, y: 0, w: width, h: height }, { fitMode: "cover" });
+    return;
+  }
+
   const palette = themePalettes[themePreset] || themePalettes.sunrise;
   const gradient = context.createLinearGradient(0, 0, width, height);
   gradient.addColorStop(0, palette.top);
@@ -3113,21 +3200,11 @@ function drawBackground(context, width, height, themePreset, accentColor) {
 }
 
 function drawPanel(context, safe, currentState) {
-  const radius = safe.w * 0.05;
+  /* カードの地は画像いっぱいに敷く（以前は外周2.5%に背景テーマの色の縁が出ていた）。
+     文字などの配置は今まで通り safe の内側を基準にするので、レイアウトは変わらない */
   context.save();
-  context.shadowColor = "rgba(78, 51, 28, 0.17)";
-  context.shadowBlur = 44;
-  context.shadowOffsetY = 24;
-  context.fillStyle = getSurfaceFill(context, safe.x, safe.y, safe.w, safe.h, 0.94);
-  roundRect(context, safe.x, safe.y, safe.w, safe.h, radius);
-  context.fill();
-  context.restore();
-
-  context.save();
-  context.lineWidth = 2;
-  context.strokeStyle = hexToRgba("#ffffff", 0.56);
-  roundRect(context, safe.x, safe.y, safe.w, safe.h, radius);
-  context.stroke();
+  context.fillStyle = getSurfaceFill(context, 0, 0, context.canvas.width, context.canvas.height, 0.94);
+  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
   context.restore();
 }
 
@@ -4473,9 +4550,9 @@ function createColorGradientRaw(context, x, y, width, height, startColor, endCol
 function isImageTheme() {
   // 背景画像が設定されていれば、テーマ配色より優先して画像を表示する
   if (state.layoutMode === "business") {
-    return Boolean(backgroundImage || backgroundImageFront || backgroundImageBack);
+    return Boolean(backgroundImage || backgroundImageFront || backgroundImageBack) || isIllustrationTheme(state.themePreset);
   }
-  return Boolean(backgroundImage);
+  return Boolean(backgroundImage) || isIllustrationTheme(state.themePreset);
 }
 
 function themedAlpha(hex, alpha) {
