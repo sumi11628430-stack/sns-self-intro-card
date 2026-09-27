@@ -2264,10 +2264,12 @@ function renderStandardCard() {
 
   const checklistTop = tagsBottom + canvas.width * 0.026;
   const checklistFieldName = checklistGroups[0]?.items[0]?.key || "checkSameWelcome";
-  const footerHeight = canvas.height * 0.065;
+  /* ひとことが未入力なら帯を出さず、その分を上の枠に使う */
+  const hasFooterMessage = Boolean(String(state.footerMessage || "").trim());
+  const footerHeight = hasFooterMessage ? canvas.height * 0.065 : 0;
   const footerTop = inner.y + inner.h - footerHeight;
   const gridTopGap = canvas.width * 0.026;
-  const gridBottomGap = canvas.width * 0.03;
+  const gridBottomGap = hasFooterMessage ? canvas.width * 0.03 : 0;
   // 闘病メモ（下段グリッド）に高さを確保し（各項目を縦に広めに）、チェックリストは残りに収まるよう自動圧縮する
   const minGridHeight = canvas.height * 0.2;
   const checklistMaxHeight = Math.max(
@@ -2304,8 +2306,10 @@ function renderStandardCard() {
   const gridHeight = Math.max(footerTop - gridBottomGap - gridTop, 0);
   const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, inner.x, gridTop, gridWidth, gridHeight, accent, text);
   focusItems.push(...oshiGridLayout.items);
-  const footerLayout = drawFooter(ctx, state.footerMessage, inner.x, footerTop, inner.w, footerHeight, accent, text);
-  focusItems.push(footerLayout.item);
+  if (hasFooterMessage) {
+    const footerLayout = drawFooter(ctx, state.footerMessage, inner.x, footerTop, inner.w, footerHeight, accent, text);
+    focusItems.push(footerLayout.item);
+  }
   return focusItems;
 }
 
@@ -2553,30 +2557,49 @@ function drawBusinessBack(context, box, oshiItems, checklistItems, accent, textC
     h: box.h - 100
   };
 
-  const footerTop = box.y + box.h - 68;
+  /* ひとことが未入力なら帯を出さず、その分を上の枠に使う */
+  const hasFooterMessage = Boolean(String(state.footerMessage || "").trim());
+  const footerTop = hasFooterMessage ? box.y + box.h - 68 : box.y + box.h - 18;
   const contentTop = inner.y + 6;
   const contentHeight = Math.max(footerTop - contentTop - 12, 180);
   const splitGap = 16;
-  const leftWidth = inner.w * 0.54;
+  /* チェックの数が少ない時は、チェック欄を細くして左の枠を広く使い、チェックの文字は大きくする */
+  const checkCount = checklistItems.reduce((sum, group) => sum + ((group && group.items) ? group.items.length : 0), 0);
+  const leftShare = checkCount <= 3 ? 0.7 : checkCount <= 6 ? 0.63 : checkCount <= 9 ? 0.58 : 0.54;
+  const leftWidth = inner.w * leftShare;
   const rightWidth = inner.w - leftWidth - splitGap;
   const focusItems = [];
 
   const oshiLayout = drawBusinessOshiGrid(context, oshiItems, inner.x, contentTop, leftWidth, contentHeight, accent, textColor);
   focusItems.push(...oshiLayout.items);
+  const checklistX = inner.x + leftWidth + splitGap;
+  const checklistScale = getChecklistPreferredScale(checklistItems);
+  context.save();
+  context.translate(checklistX, contentTop);
+  context.scale(checklistScale, checklistScale);
   const checklistLayout = drawBusinessChecklistPanel(
     context,
     checklistItems,
-    inner.x + leftWidth + splitGap,
-    contentTop,
-    rightWidth,
-    contentHeight,
+    0,
+    0,
+    rightWidth / checklistScale,
+    contentHeight / checklistScale,
     accent,
     textColor,
     checklistGroups[0]?.items[0]?.key || "checkSameWelcome"
   );
-  focusItems.push(...checklistLayout.items);
-  const footerLayout = drawBusinessFooterBand(context, state.footerMessage, inner.x, footerTop, inner.w, 40, accent, textColor);
-  focusItems.push(footerLayout.item);
+  context.restore();
+  focusItems.push(...checklistLayout.items.map((item) => ({
+    ...item,
+    x: checklistX + item.x * checklistScale,
+    y: contentTop + item.y * checklistScale,
+    width: item.width * checklistScale,
+    height: item.height * checklistScale
+  })));
+  if (hasFooterMessage) {
+    const footerLayout = drawBusinessFooterBand(context, state.footerMessage, inner.x, footerTop, inner.w, 40, accent, textColor);
+    focusItems.push(footerLayout.item);
+  }
   return focusItems;
 }
 
@@ -2971,15 +2994,11 @@ function drawBusinessOshiGrid(context, items, x, y, width, height, accent, textC
   const gap = 12;
   const columns = 2;
   const rows = 2;
-  const cardWidth = (width - gap) / columns;
-  const cardHeight = (height - gap) / rows;
+  const boxes = getAdaptiveGridBoxes(items.slice(0, 4), x, y, width, height, gap, columns);
   const hotspotItems = [];
 
   items.slice(0, 4).forEach((item, index) => {
-    const col = index % columns;
-    const row = Math.floor(index / columns);
-    const boxX = x + col * (cardWidth + gap);
-    const boxY = y + row * (cardHeight + gap);
+    const { x: boxX, y: boxY, w: cardWidth, h: cardHeight } = boxes[index];
 
     context.fillStyle = getAccentFill(context, boxX, boxY, cardWidth, cardHeight, 0.08, 0.14);
     roundRect(context, boxX, boxY, cardWidth, cardHeight, 22);
@@ -3753,9 +3772,11 @@ function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, 
     return { paddingTop, badgeHeight, badgeFont, titleFont, headerFont, sectionLayouts, panelHeight };
   };
 
-  let layout = computeLayout(1);
+  /* 選んだ項目が少ない時は文字を大きくする。入りきらなければ少しずつ小さくして収める */
+  const preferredScale = getChecklistPreferredScale(groups);
+  let layout = computeLayout(preferredScale);
   if (preparedGroups.length && layout.panelHeight > maxHeight) {
-    for (let scale = 0.94; scale >= 0.5; scale -= 0.03) {
+    for (let scale = preferredScale - 0.03; scale >= 0.5; scale -= 0.03) {
       layout = computeLayout(scale);
       if (layout.panelHeight <= maxHeight) {
         break;
@@ -3814,19 +3835,71 @@ function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, 
   };
 }
 
+/* 4つの枠（自由項目・闘病メモ・推しプロフィール）の広さを、入力した文字の量に合わせて配分する。
+   文章の多い段は高く、同じ段の中では文章の多い枠を広くする。
+   極端にならないよう、段の高さは30〜70%、枠の幅は35〜65%の範囲に収める（未入力の枠は小さめ） */
+function getAdaptiveGridBoxes(items, x, y, width, height, gap, columns = 2) {
+  const rows = Math.max(Math.ceil(items.length / columns), 1);
+  const weightOf = (item) => {
+    const length = String((item && item.value) || "").replace(/\s+/g, "").length;
+    return length ? Math.max(length, 8) : 4;
+  };
+  const clampShares = (weights, min, max) => {
+    const total = weights.reduce((sum, w) => sum + w, 0) || 1;
+    let shares = weights.map((w) => w / total);
+    for (let pass = 0; pass < 4; pass += 1) {
+      shares = shares.map((share) => Math.min(Math.max(share, min), max));
+      const sum = shares.reduce((a, b) => a + b, 0);
+      shares = shares.map((share) => share / sum);
+    }
+    return shares;
+  };
+  const rowItems = [];
+  for (let r = 0; r < rows; r += 1) {
+    rowItems.push(items.slice(r * columns, r * columns + columns));
+  }
+  const rowShares = rows > 1
+    ? clampShares(rowItems.map((row) => row.reduce((sum, item) => sum + weightOf(item), 0)), 0.6 / rows, 1.4 / rows)
+    : [1];
+  const usableHeight = Math.max(height - gap * (rows - 1), 10 * rows);
+  const usableWidth = Math.max(width - gap * (columns - 1), 10 * columns);
+  const boxes = [];
+  let cursorY = y;
+  rowItems.forEach((row, rowIndex) => {
+    const rowHeight = Math.max(usableHeight * rowShares[rowIndex], 10);
+    const colShares = row.length === columns
+      ? clampShares(row.map(weightOf), 0.7 / columns, 1.3 / columns)
+      : row.map(() => 1 / columns);
+    let cursorX = x;
+    row.forEach((item, colIndex) => {
+      const boxWidth = Math.max(usableWidth * colShares[colIndex], 10);
+      boxes.push({ x: cursorX, y: cursorY, w: boxWidth, h: rowHeight });
+      cursorX += boxWidth + gap;
+    });
+    cursorY += rowHeight + gap;
+  });
+  return boxes;
+}
+
+/* チェックリストは、選んだ項目が少ないほど文字を大きくする（倍率） */
+function getChecklistPreferredScale(groups) {
+  const count = (groups || []).reduce((sum, group) => sum + ((group && group.items) ? group.items.length : 0), 0);
+  if (count === 0) return 1;
+  if (count <= 3) return 1.45;
+  if (count <= 6) return 1.3;
+  if (count <= 9) return 1.15;
+  return 1;
+}
+
 function drawOshiItemGrid(context, items, x, y, width, height, accent, textColor) {
   const gap = 14;
   const columns = 2;
   const rows = Math.ceil(items.length / columns);
-  const cardWidth = Math.max((width - gap * (columns - 1)) / columns, 10);
-  const cardHeight = Math.max((height - gap * (rows - 1)) / rows, 10);
+  const boxes = getAdaptiveGridBoxes(items, x, y, width, height, gap, columns);
   const hotspotItems = [];
 
   items.forEach((item, index) => {
-    const col = index % columns;
-    const row = Math.floor(index / columns);
-    const boxX = x + col * (cardWidth + gap);
-    const boxY = y + row * (cardHeight + gap);
+    const { x: boxX, y: boxY, w: cardWidth, h: cardHeight } = boxes[index];
     const horizontalPadding = 18;
     const textWidth = cardWidth - horizontalPadding * 2;
     const titleText = clampText(item.label || "項目", 18);

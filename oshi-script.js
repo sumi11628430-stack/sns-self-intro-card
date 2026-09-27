@@ -2228,20 +2228,31 @@ function renderStandardCard() {
   const checklistFieldName = checklistGroups[0]?.items[0]?.key || "checkSameWelcome";
   const hasChecklistItems = checklistItems.length > 0;
   const checklistTop = tagsBottom + (hasChecklistItems ? canvas.width * 0.014 : 0);
-  const footerHeight = canvas.height * 0.042;
+  /* ひとことが未入力なら帯を出さず、その分を上の枠に使う */
+  const hasFooterMessage = Boolean(String(state.footerMessage || "").trim());
+  const footerHeight = hasFooterMessage ? canvas.height * 0.042 : 0;
   const footerTop = inner.y + inner.h - footerHeight;
-  const gridBottomGap = canvas.width * 0.004;
+  const gridBottomGap = hasFooterMessage ? canvas.width * 0.004 : 0;
 
   /* 推しの項目（推し・担当など）は、チェックリストの下の残りの高さに並べる。
      正方形サイズなどで残りが足りず枠がつぶれる時は、チェックリストを右、推しの項目を左に横並びにする */
   const minOshiGridHeight = oshiItems.length ? canvas.width * 0.24 : 0;
+  /* 選んだ項目が少ない時は、チェックリストの文字を大きくする（下の枠の高さが足りる範囲で） */
+  const preferredChecklistScale = getChecklistPreferredScale(checklistItems);
+  let stackedChecklistScale = 1;
   let useSideBySide = false;
   if (hasChecklistItems && oshiItems.length) {
-    const stackedChecklistBottom = drawChecklistPanel(
-      getScratchContext(), checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName
-    ).bottom;
-    const stackedGridHeight = footerTop - gridBottomGap - (stackedChecklistBottom + canvas.width * 0.01);
-    useSideBySide = stackedGridHeight < minOshiGridHeight;
+    useSideBySide = true;
+    for (let scale = preferredChecklistScale; scale >= 0.999; scale -= 0.05) {
+      const bottom = checklistTop + measureChecklistPanelScaled(checklistItems, inner.w, accent, text, checklistFieldName, scale);
+      if (footerTop - gridBottomGap - (bottom + canvas.width * 0.01) >= minOshiGridHeight) {
+        stackedChecklistScale = scale;
+        useSideBySide = false;
+        break;
+      }
+    }
+  } else if (hasChecklistItems) {
+    stackedChecklistScale = preferredChecklistScale;
   }
 
   const gridX = inner.x;
@@ -2254,7 +2265,7 @@ function renderStandardCard() {
     /* 右の列に入りきらない時は、チェックリストを少しずつ縮めて（最小60%）ひとことの帯の上に収める */
     const availableHeight = footerTop - gridBottomGap - checklistTop;
     let checklistScale = 1;
-    for (let scale = 1; scale >= 0.6; scale -= 0.05) {
+    for (let scale = preferredChecklistScale; scale >= 0.6; scale -= 0.05) {
       checklistScale = scale;
       const naturalHeight = drawChecklistPanel(
         getScratchContext(), checklistItems, 0, 0, checklistWidth / scale, accent, text, checklistFieldName
@@ -2281,7 +2292,7 @@ function renderStandardCard() {
     gridTop = checklistTop + canvas.width * 0.012;
   } else {
     const checklistLayout = hasChecklistItems
-      ? drawChecklistPanel(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName)
+      ? drawChecklistPanelScaled(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, stackedChecklistScale)
       : { bottom: tagsBottom, items: [] };
     focusItems.push(...checklistLayout.items);
     gridTop = checklistLayout.bottom + canvas.width * (hasChecklistItems ? 0.01 : 0.012);
@@ -2289,8 +2300,10 @@ function renderStandardCard() {
   const gridHeight = Math.max(footerTop - gridBottomGap - gridTop, 0);
   const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, gridX, gridTop, gridWidth, gridHeight, accent, text);
   focusItems.push(...oshiGridLayout.items);
-  const footerLayout = drawFooter(ctx, state.footerMessage, inner.x, footerTop, inner.w, footerHeight, accent, text);
-  focusItems.push(footerLayout.item);
+  if (hasFooterMessage) {
+    const footerLayout = drawFooter(ctx, state.footerMessage, inner.x, footerTop, inner.w, footerHeight, accent, text);
+    focusItems.push(footerLayout.item);
+  }
   return focusItems;
 }
 
@@ -2538,30 +2551,49 @@ function drawBusinessBack(context, box, oshiItems, checklistItems, accent, textC
     h: box.h - 100
   };
 
-  const footerTop = box.y + box.h - 68;
+  /* ひとことが未入力なら帯を出さず、その分を上の枠に使う */
+  const hasFooterMessage = Boolean(String(state.footerMessage || "").trim());
+  const footerTop = hasFooterMessage ? box.y + box.h - 68 : box.y + box.h - 18;
   const contentTop = inner.y + 6;
   const contentHeight = Math.max(footerTop - contentTop - 12, 180);
   const splitGap = 16;
-  const leftWidth = inner.w * 0.54;
+  /* チェックの数が少ない時は、チェック欄を細くして左の枠を広く使い、チェックの文字は大きくする */
+  const checkCount = checklistItems.reduce((sum, group) => sum + ((group && group.items) ? group.items.length : 0), 0);
+  const leftShare = checkCount <= 3 ? 0.7 : checkCount <= 6 ? 0.63 : checkCount <= 9 ? 0.58 : 0.54;
+  const leftWidth = inner.w * leftShare;
   const rightWidth = inner.w - leftWidth - splitGap;
   const focusItems = [];
 
   const oshiLayout = drawBusinessOshiGrid(context, oshiItems, inner.x, contentTop, leftWidth, contentHeight, accent, textColor);
   focusItems.push(...oshiLayout.items);
+  const checklistX = inner.x + leftWidth + splitGap;
+  const checklistScale = getChecklistPreferredScale(checklistItems);
+  context.save();
+  context.translate(checklistX, contentTop);
+  context.scale(checklistScale, checklistScale);
   const checklistLayout = drawBusinessChecklistPanel(
     context,
     checklistItems,
-    inner.x + leftWidth + splitGap,
-    contentTop,
-    rightWidth,
-    contentHeight,
+    0,
+    0,
+    rightWidth / checklistScale,
+    contentHeight / checklistScale,
     accent,
     textColor,
     checklistGroups[0]?.items[0]?.key || "checkSameWelcome"
   );
-  focusItems.push(...checklistLayout.items);
-  const footerLayout = drawBusinessFooterBand(context, state.footerMessage, inner.x, footerTop, inner.w, 40, accent, textColor);
-  focusItems.push(footerLayout.item);
+  context.restore();
+  focusItems.push(...checklistLayout.items.map((item) => ({
+    ...item,
+    x: checklistX + item.x * checklistScale,
+    y: contentTop + item.y * checklistScale,
+    width: item.width * checklistScale,
+    height: item.height * checklistScale
+  })));
+  if (hasFooterMessage) {
+    const footerLayout = drawBusinessFooterBand(context, state.footerMessage, inner.x, footerTop, inner.w, 40, accent, textColor);
+    focusItems.push(footerLayout.item);
+  }
   return focusItems;
 }
 
@@ -2956,15 +2988,11 @@ function drawBusinessOshiGrid(context, items, x, y, width, height, accent, textC
   const gap = 12;
   const columns = 2;
   const rows = 2;
-  const cardWidth = (width - gap) / columns;
-  const cardHeight = (height - gap) / rows;
+  const boxes = getAdaptiveGridBoxes(items.slice(0, 4), x, y, width, height, gap, columns);
   const hotspotItems = [];
 
   items.slice(0, 4).forEach((item, index) => {
-    const col = index % columns;
-    const row = Math.floor(index / columns);
-    const boxX = x + col * (cardWidth + gap);
-    const boxY = y + row * (cardHeight + gap);
+    const { x: boxX, y: boxY, w: cardWidth, h: cardHeight } = boxes[index];
 
     context.fillStyle = getAccentFill(context, boxX, boxY, cardWidth, cardHeight, 0.08, 0.14);
     roundRect(context, boxX, boxY, cardWidth, cardHeight, 22);
@@ -3778,19 +3806,94 @@ function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, 
   };
 }
 
+/* 4つの枠（自由項目・闘病メモ・推しプロフィール）の広さを、入力した文字の量に合わせて配分する。
+   文章の多い段は高く、同じ段の中では文章の多い枠を広くする。
+   極端にならないよう、段の高さは30〜70%、枠の幅は35〜65%の範囲に収める（未入力の枠は小さめ） */
+function getAdaptiveGridBoxes(items, x, y, width, height, gap, columns = 2) {
+  const rows = Math.max(Math.ceil(items.length / columns), 1);
+  const weightOf = (item) => {
+    const length = String((item && item.value) || "").replace(/\s+/g, "").length;
+    return length ? Math.max(length, 8) : 4;
+  };
+  const clampShares = (weights, min, max) => {
+    const total = weights.reduce((sum, w) => sum + w, 0) || 1;
+    let shares = weights.map((w) => w / total);
+    for (let pass = 0; pass < 4; pass += 1) {
+      shares = shares.map((share) => Math.min(Math.max(share, min), max));
+      const sum = shares.reduce((a, b) => a + b, 0);
+      shares = shares.map((share) => share / sum);
+    }
+    return shares;
+  };
+  const rowItems = [];
+  for (let r = 0; r < rows; r += 1) {
+    rowItems.push(items.slice(r * columns, r * columns + columns));
+  }
+  const rowShares = rows > 1
+    ? clampShares(rowItems.map((row) => row.reduce((sum, item) => sum + weightOf(item), 0)), 0.6 / rows, 1.4 / rows)
+    : [1];
+  const usableHeight = Math.max(height - gap * (rows - 1), 10 * rows);
+  const usableWidth = Math.max(width - gap * (columns - 1), 10 * columns);
+  const boxes = [];
+  let cursorY = y;
+  rowItems.forEach((row, rowIndex) => {
+    const rowHeight = Math.max(usableHeight * rowShares[rowIndex], 10);
+    const colShares = row.length === columns
+      ? clampShares(row.map(weightOf), 0.7 / columns, 1.3 / columns)
+      : row.map(() => 1 / columns);
+    let cursorX = x;
+    row.forEach((item, colIndex) => {
+      const boxWidth = Math.max(usableWidth * colShares[colIndex], 10);
+      boxes.push({ x: cursorX, y: cursorY, w: boxWidth, h: rowHeight });
+      cursorX += boxWidth + gap;
+    });
+    cursorY += rowHeight + gap;
+  });
+  return boxes;
+}
+
+/* チェックリストは、選んだ項目が少ないほど文字を大きくする（倍率） */
+function getChecklistPreferredScale(groups) {
+  const count = (groups || []).reduce((sum, group) => sum + ((group && group.items) ? group.items.length : 0), 0);
+  if (count === 0) return 1;
+  if (count <= 3) return 1.45;
+  if (count <= 6) return 1.3;
+  if (count <= 9) return 1.15;
+  return 1;
+}
+
+/* チェックリストを倍率を付けて描く（倍率に合わせて並びも組み直す）。戻り値の位置は元の座標に直す */
+function drawChecklistPanelScaled(context, groups, x, y, width, accent, textColor, focusFieldName, scale) {
+  context.save();
+  context.translate(x, y);
+  context.scale(scale, scale);
+  const layout = drawChecklistPanel(context, groups, 0, 0, width / scale, accent, textColor, focusFieldName);
+  context.restore();
+  return {
+    bottom: y + layout.bottom * scale,
+    items: layout.items.map((item) => ({
+      ...item,
+      x: x + item.x * scale,
+      y: y + item.y * scale,
+      width: item.width * scale,
+      height: item.height * scale
+    }))
+  };
+}
+
+function measureChecklistPanelScaled(groups, width, accent, textColor, focusFieldName, scale) {
+  return drawChecklistPanel(getScratchContext(), groups, 0, 0, width / scale, accent, textColor, focusFieldName).bottom * scale;
+}
+
 function drawOshiItemGrid(context, items, x, y, width, height, accent, textColor) {
   const gap = 10;
   const columns = 2;
   const rows = Math.ceil(items.length / columns);
-  const cardWidth = Math.max((width - gap * (columns - 1)) / columns, 10);
-  const cardHeight = Math.max((height - gap * (rows - 1)) / rows, 10);
+  const boxes = getAdaptiveGridBoxes(items, x, y, width, height, gap, columns);
   const hotspotItems = [];
 
   items.forEach((item, index) => {
-    const col = index % columns;
-    const row = Math.floor(index / columns);
-    const boxX = x + col * (cardWidth + gap);
-    const boxY = y + row * (cardHeight + gap);
+    const { x: boxX, y: boxY, w: cardWidth, h: cardHeight } = boxes[index];
     const horizontalPadding = 18;
     const textWidth = cardWidth - horizontalPadding * 2;
     const titleText = clampText(item.label || "項目", 18);
