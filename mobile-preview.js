@@ -136,6 +136,100 @@
     }
   }
 
+  /* 表示倍率を上げた時：カードを見る窓（canvas-scroller）の大きさは等倍の時のままにして、
+     窓の中でカードを上下左右に動かせるようにする。
+     ・パソコン：カードをつかんで引っ張る／ホイール（縦）／Shift＋ホイール（横）
+     ・スマホ：指で上下左右になぞる
+     拡大・縮小しても、見ていた場所（窓の真ん中）がずれないようにする */
+  if (stage && cardCanvas) {
+    const scroller = document.createElement("div");
+    scroller.className = "canvas-scroller";
+    stage.parentNode.insertBefore(scroller, stage);
+    scroller.appendChild(stage);
+
+    let lastZoom = 1;
+    let centerX = 0.5;
+    let centerY = 0.5;
+    const currentZoom = () => parseFloat(stage.style.getPropertyValue("--preview-zoom")) || 1;
+
+    const rememberCenter = () => {
+      if (!scroller.classList.contains("is-zoomed")) {
+        return;
+      }
+      centerX = (scroller.scrollLeft + scroller.clientWidth / 2) / Math.max(scroller.scrollWidth, 1);
+      centerY = (scroller.scrollTop + scroller.clientHeight / 2) / Math.max(scroller.scrollHeight, 1);
+    };
+
+    const updateScroller = () => {
+      const zoom = currentZoom();
+      const zoomed = zoom > 1.001;
+      if (zoomed && lastZoom <= 1.001) {
+        centerX = 0.5;
+        centerY = 0.5;
+      }
+      scroller.classList.toggle("is-zoomed", zoomed);
+      if (zoomed && cardCanvas.width) {
+        const baseWidth = stage.getBoundingClientRect().width / zoom;
+        scroller.style.maxHeight = `${Math.round(baseWidth * (cardCanvas.height / cardCanvas.width))}px`;
+        scroller.scrollLeft = centerX * scroller.scrollWidth - scroller.clientWidth / 2;
+        scroller.scrollTop = centerY * scroller.scrollHeight - scroller.clientHeight / 2;
+      } else {
+        scroller.style.maxHeight = "";
+      }
+      lastZoom = zoom;
+    };
+
+    scroller.addEventListener("scroll", rememberCenter, { passive: true });
+    new MutationObserver(() => requestAnimationFrame(updateScroller)).observe(stage, { attributes: true, attributeFilter: ["style"] });
+    new MutationObserver(() => requestAnimationFrame(updateScroller)).observe(cardCanvas, { attributes: true, attributeFilter: ["width", "height"] });
+    window.addEventListener("resize", () => requestAnimationFrame(updateScroller));
+
+    /* マウスでつかんで動かす（少し動かした時だけ。ただのクリックは今まで通り入力欄へ移動する） */
+    let drag = null;
+    let suppressClick = false;
+    scroller.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse" || event.button !== 0 || !scroller.classList.contains("is-zoomed")) {
+        return;
+      }
+      drag = { x: event.clientX, y: event.clientY, left: scroller.scrollLeft, top: scroller.scrollTop, moved: false };
+    });
+    window.addEventListener("pointermove", (event) => {
+      if (!drag) {
+        return;
+      }
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) < 5) {
+        return;
+      }
+      if (!drag.moved) {
+        drag.moved = true;
+        scroller.classList.add("is-dragging");
+      }
+      scroller.scrollLeft = drag.left - dx;
+      scroller.scrollTop = drag.top - dy;
+      event.preventDefault();
+    });
+    window.addEventListener("pointerup", () => {
+      if (!drag) {
+        return;
+      }
+      if (drag.moved) {
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 0);
+      }
+      scroller.classList.remove("is-dragging");
+      drag = null;
+    });
+    scroller.addEventListener("click", (event) => {
+      if (suppressClick) {
+        event.stopPropagation();
+        event.preventDefault();
+        suppressClick = false;
+      }
+    }, true);
+  }
+
   if (stage && cardCanvas) {
     window.addEventListener("resize", fitPreviewToScreen);
     new MutationObserver(fitPreviewToScreen).observe(cardCanvas, { attributes: true, attributeFilter: ["width", "height"] });

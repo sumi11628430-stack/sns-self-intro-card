@@ -1073,7 +1073,7 @@ function loadSample() {
     tags: "K-POP, 箱推し, 配信視聴, ぬい撮り",
     footerMessage: "推しの話をたくさんできるお友達がほしいです",
     layoutMode: "standard",
-    sizePreset: "square",
+    sizePreset: state.sizePreset || defaultState.sizePreset, /* 入力例を入れても、今選んでいるサイズのまま */
     themePreset: "sunrise",
     frameStyle: "soft",
     avatarShape: "rounded",
@@ -2104,7 +2104,7 @@ function renderStandardCard() {
   const text = state.textColor;
   const tags = parseTags(state.tags);
   const metaItems = collectMetaItems();
-  const oshiItems = collectOshiItems();
+  const oshiItems = collectOshiItems().filter((item) => hasText(item.value));
   const checklistItems = collectChecklistItems();
   const socialLinks = collectSocialLinks();
   const avatarSize = clamp(inner.w * 0.255, 178, 248);
@@ -2140,8 +2140,8 @@ function renderStandardCard() {
   drawAvatar(ctx, avatarBox, state, accent, text);
   drawFrameAccent(ctx, safe, inner, state);
 
-  const roleVisible = isPreviewVisible(state.roleVisible);
-  const nameVisible = isPreviewVisible(state.displayNameVisible);
+  const roleVisible = isPreviewVisible(state.roleVisible) && hasText(state.role);
+  const nameVisible = isPreviewVisible(state.displayNameVisible) && hasText(state.displayName);
   let headerBottom = headerRight.y;
 
   if (roleVisible) {
@@ -2158,9 +2158,12 @@ function renderStandardCard() {
   }
 
   const introTop = roleVisible || nameVisible ? headerBottom + 18 : headerRight.y;
-  const introLayout = drawIntroBlock(ctx, headerRight.x, introTop, headerRight.w, clampText(state.intro, 180), text);
-  const introBottom = introLayout.bottom;
-  focusItems.push(introLayout.item);
+  let introBottom = roleVisible || nameVisible ? headerBottom : headerRight.y;
+  if (hasText(state.intro)) {
+    const introLayout = drawIntroBlock(ctx, headerRight.x, introTop, headerRight.w, clampText(state.intro, 180), text);
+    introBottom = introLayout.bottom;
+    focusItems.push(introLayout.item);
+  }
   const reservedSocialBottom = socialLinks.length
     ? introBottom + clamp(canvas.width * 0.015, 10, 14) + 38
     : introBottom;
@@ -2179,7 +2182,7 @@ function renderStandardCard() {
     if (socialLinks.length) {
       const scratchCtx = getScratchContext();
       const metaNaturalHeight = drawMetaInfo(scratchCtx, metaItems, 0, 0, metaWidth, accent, text).bottom;
-      const socialNaturalHeight = measureStandardSocialQrGridHeight(socialLinks);
+      const socialNaturalHeight = measureStandardSocialQrGridHeight(socialLinks, 1, qrColumnWidth);
       const targetHeight = Math.max(metaNaturalHeight, socialNaturalHeight);
       metaScale = metaNaturalHeight > 0 ? clamp(targetHeight / metaNaturalHeight, 1, 1.25) : 1;
       socialScale = socialNaturalHeight > 0 ? clamp(targetHeight / socialNaturalHeight, 1, 1.25) : 1;
@@ -2311,7 +2314,7 @@ function renderBusinessCard() {
   const accent = state.accentColor;
   const text = state.textColor;
   const metaItems = collectMetaItems();
-  const oshiItems = collectOshiItems();
+  const oshiItems = collectOshiItems().filter((item) => hasText(item.value));
   const checklistItems = collectChecklistItems();
   const frontBackgroundImage = getBusinessSideBackgroundImage("front");
   const backBackgroundImage = getBusinessSideBackgroundImage("back");
@@ -2467,8 +2470,8 @@ function drawBusinessFront(context, box, metaItems, accent, textColor) {
   };
   const contentX = inner.x;
   const contentW = leftColumnWidth;
-  const roleVisible = isPreviewVisible(state.roleVisible);
-  const nameVisible = isPreviewVisible(state.displayNameVisible);
+  const roleVisible = isPreviewVisible(state.roleVisible) && hasText(state.role);
+  const nameVisible = isPreviewVisible(state.displayNameVisible) && hasText(state.displayName);
   const focusItems = [
     makeAdjustItem(
       "avatar",
@@ -2498,17 +2501,20 @@ function drawBusinessFront(context, box, metaItems, accent, textColor) {
   }
 
   const introTop = roleVisible || nameVisible ? cursorY + 8 : inner.y + 8;
-  const introLayout = drawBusinessIntroBlock(
-    context,
-    contentX,
-    introTop,
-    contentW,
-    clampText(state.intro, 120),
-    textColor,
-    3
-  );
-  const introBottom = introLayout.bottom;
-  focusItems.push(introLayout.item);
+  let introBottom = roleVisible || nameVisible ? cursorY : inner.y;
+  if (hasText(state.intro)) {
+    const introLayout = drawBusinessIntroBlock(
+      context,
+      contentX,
+      introTop,
+      contentW,
+      clampText(state.intro, 120),
+      textColor,
+      3
+    );
+    introBottom = introLayout.bottom;
+    focusItems.push(introLayout.item);
+  }
   const qrItems = drawBusinessSocialQrGrid(
     context,
     socialLinks,
@@ -2560,36 +2566,43 @@ function drawBusinessBack(context, box, oshiItems, checklistItems, accent, textC
   /* チェックの数が少ない時は、チェック欄を細くして左の枠を広く使い、チェックの文字は大きくする */
   const checkCount = checklistItems.reduce((sum, group) => sum + ((group && group.items) ? group.items.length : 0), 0);
   const leftShare = checkCount <= 3 ? 0.7 : checkCount <= 6 ? 0.63 : checkCount <= 9 ? 0.58 : 0.54;
-  const leftWidth = inner.w * leftShare;
-  const rightWidth = inner.w - leftWidth - splitGap;
+  /* 未入力の側は出さず、もう一方を横いっぱいに使う */
+  const showGrid = oshiItems.length > 0;
+  const showChecklist = checklistItems.length > 0;
+  const leftWidth = !showChecklist ? inner.w : inner.w * leftShare;
+  const rightWidth = !showGrid ? inner.w : inner.w - leftWidth - splitGap;
   const focusItems = [];
 
-  const oshiLayout = drawBusinessOshiGrid(context, oshiItems, inner.x, contentTop, leftWidth, contentHeight, accent, textColor);
-  focusItems.push(...oshiLayout.items);
-  const checklistX = inner.x + leftWidth + splitGap;
-  const checklistScale = getChecklistPreferredScale(checklistItems);
-  context.save();
-  context.translate(checklistX, contentTop);
-  context.scale(checklistScale, checklistScale);
-  const checklistLayout = drawBusinessChecklistPanel(
-    context,
-    checklistItems,
-    0,
-    0,
-    rightWidth / checklistScale,
-    contentHeight / checklistScale,
-    accent,
-    textColor,
-    checklistGroups[0]?.items[0]?.key || "checkSameWelcome"
-  );
-  context.restore();
-  focusItems.push(...checklistLayout.items.map((item) => ({
-    ...item,
-    x: checklistX + item.x * checklistScale,
-    y: contentTop + item.y * checklistScale,
-    width: item.width * checklistScale,
-    height: item.height * checklistScale
-  })));
+  if (showGrid) {
+    const oshiLayout = drawBusinessOshiGrid(context, oshiItems, inner.x, contentTop, leftWidth, contentHeight, accent, textColor);
+    focusItems.push(...oshiLayout.items);
+  }
+  const checklistX = showGrid ? inner.x + leftWidth + splitGap : inner.x;
+  if (showChecklist) {
+    const checklistScale = getChecklistPreferredScale(checklistItems);
+    context.save();
+    context.translate(checklistX, contentTop);
+    context.scale(checklistScale, checklistScale);
+    const checklistLayout = drawBusinessChecklistPanel(
+      context,
+      checklistItems,
+      0,
+      0,
+      rightWidth / checklistScale,
+      contentHeight / checklistScale,
+      accent,
+      textColor,
+      checklistGroups[0]?.items[0]?.key || "checkSameWelcome"
+    );
+    context.restore();
+    focusItems.push(...checklistLayout.items.map((item) => ({
+      ...item,
+      x: checklistX + item.x * checklistScale,
+      y: contentTop + item.y * checklistScale,
+      width: item.width * checklistScale,
+      height: item.height * checklistScale
+    })));
+  }
   if (hasFooterMessage) {
     const footerLayout = drawBusinessFooterBand(context, state.footerMessage, inner.x, footerTop, inner.w, 40, accent, textColor);
     focusItems.push(footerLayout.item);
@@ -2675,43 +2688,68 @@ function drawBusinessIntroBlock(context, x, y, maxWidth, intro, textColor, maxLi
   };
 }
 
+/* 名刺の基本情報チップ：長い時は文字を小さくして（14pxまで）1行に収め、それでも入りきらなければ2行に折り返す */
 function drawBusinessMetaChips(context, items, x, y, maxWidth, accent, textColor) {
   const tagHeight = 40;
   const horizontalGap = 10;
   const verticalGap = 10;
+  const baseFont = 18;
+  const minFont = 14;
   let cursorX = x;
   let cursorY = y;
+  let rowHeight = tagHeight;
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = getCanvasFont(18, 700, "body");
   const hotspotItems = [];
 
   items.forEach((item) => {
     const label = `${item.label}：`;
-    const value = clampText(item.value, 18);
-    const width = Math.min(context.measureText(`${label}${value}`).width + 28, maxWidth);
+    const rawValue = String(item.value || "").trim();
+    const maxTextWidth = Math.max(maxWidth - 28, 20);
+    context.font = getCanvasFont(baseFont, 700, "body");
+    const naturalWidth = context.measureText(label + rawValue).width;
+    let fontSize = baseFont;
+    let lines = [rawValue];
+    if (naturalWidth > maxTextWidth) {
+      fontSize = Math.max(baseFont * (maxTextWidth / naturalWidth), minFont);
+      context.font = getCanvasFont(fontSize, 700, "body");
+      if (context.measureText(label + rawValue).width > maxTextWidth) {
+        lines = wrapTextBalanced(context, rawValue, Math.max(maxTextWidth - context.measureText(label).width, 20), 2);
+      }
+    }
+    context.font = getCanvasFont(fontSize, 700, "body");
+    const labelWidth = context.measureText(label).width;
+    const lineHeight = Math.round(fontSize * 1.3);
+    const valueWidth = Math.max(...lines.map((line) => context.measureText(line).width));
+    const width = Math.min(labelWidth + valueWidth + 28, maxWidth);
+    const height = tagHeight + (lines.length - 1) * lineHeight;
 
     if (cursorX + width > x + maxWidth) {
       cursorX = x;
-      cursorY += tagHeight + verticalGap;
+      cursorY += rowHeight + verticalGap;
+      rowHeight = tagHeight;
     }
+    rowHeight = Math.max(rowHeight, height);
 
-    context.fillStyle = getAccentFill(context, cursorX, cursorY, width, tagHeight, 0.1, 0.16);
-    roundRect(context, cursorX, cursorY, width, tagHeight, 999);
+    context.fillStyle = getAccentFill(context, cursorX, cursorY, width, height, 0.1, 0.16);
+    roundRect(context, cursorX, cursorY, width, height, lines.length > 1 ? 18 : 999);
     context.fill();
 
     const textX = cursorX + 14;
+    const firstLineY = cursorY + tagHeight / 2 + 1;
     context.fillStyle = hexToRgba(getLabelTextColor(), 0.82);
-    context.fillText(label, textX, cursorY + tagHeight / 2 + 1);
+    context.fillText(label, textX, firstLineY);
     context.fillStyle = textColor;
-    context.fillText(value, textX + context.measureText(label).width, cursorY + tagHeight / 2 + 1);
-    hotspotItems.push(makeFocusItem(item.fieldName, item.label, cursorX, cursorY, width, tagHeight, 999));
+    lines.forEach((line, lineIndex) => {
+      context.fillText(line, textX + labelWidth, firstLineY + lineIndex * lineHeight);
+    });
+    hotspotItems.push(makeFocusItem(item.fieldName, item.label, cursorX, cursorY, width, height, lines.length > 1 ? 18 : 999));
     cursorX += width + horizontalGap;
   });
 
   return {
-    bottom: cursorY + tagHeight,
+    bottom: cursorY + rowHeight,
     items: hotspotItems
   };
 }
@@ -3343,6 +3381,11 @@ function isPreviewVisible(value) {
   return value !== "hide";
 }
 
+/* 未入力の欄はカードに出さない（見本の文字も出さず、その分の場所を他に使う） */
+function hasText(value) {
+  return Boolean(String(value || "").trim());
+}
+
 function drawNameBlock(context, labelText, x, y, maxWidth, name, textColor) {
   context.fillStyle = textColor;
   context.textAlign = "left";
@@ -3441,15 +3484,11 @@ function drawSocialLinks(context, links, x, y, maxWidth, options = {}) {
   };
 }
 
-function measureStandardSocialQrGridHeight(links, scale = 1) {
-  const rows = Math.min(links.length, 4);
-  if (!rows) {
+function measureStandardSocialQrGridHeight(links, scale = 1, width = 360) {
+  if (!links.length) {
     return 0;
   }
-
-  const rowGap = 12 * scale;
-  const rowHeight = 46 * scale;
-  return rows * rowHeight + Math.max(rows - 1, 0) * rowGap;
+  return drawStandardSocialQrGrid(getScratchContext(), links, 0, 0, width, "#000000", "#000000", scale).bottom;
 }
 
 function drawStandardSocialQrGrid(context, links, x, y, width, accent, textColor, scale = 1) {
@@ -3467,18 +3506,32 @@ function drawStandardSocialQrGrid(context, links, x, y, width, accent, textColor
   const cellWidth = Math.floor((width - colGap * (columns - 1)) / columns);
   const items = [];
 
+  /* 段の高さは、その段で一番行数の多いアドレスに合わせる（折り返した分だけ高くなる） */
+  const rowHeights = [];
+  visibleLinks.forEach((link, index) => {
+    const row = Math.floor(index / columns);
+    const needed = layoutAddressRow(getScratchContext(), link, cellWidth, scale).height + 4 * scale;
+    rowHeights[row] = Math.max(rowHeights[row] || rowHeight, needed);
+  });
+  const rowTops = [];
+  let cursorY = y;
+  for (let row = 0; row < rows; row += 1) {
+    rowTops[row] = cursorY;
+    cursorY += rowHeights[row] + rowGap;
+  }
+
   visibleLinks.forEach((link, index) => {
     const col = index % columns;
     const row = Math.floor(index / columns);
     const cellX = x + col * (cellWidth + colGap);
-    const cellY = y + row * (rowHeight + rowGap);
+    const cellY = rowTops[row];
 
     drawAddressRow(context, link, cellX, cellY, cellWidth, accent, getSocialQrLabel(link), scale);
-    items.push(makeExternalLinkItem(link.url, link.label, cellX, cellY, cellWidth, rowHeight, 8));
+    items.push(makeExternalLinkItem(link.url, link.label, cellX, cellY, cellWidth, rowHeights[row], 8));
   });
 
   return {
-    bottom: y + rows * rowHeight + Math.max(rows - 1, 0) * rowGap,
+    bottom: rows ? rowTops[rows - 1] + rowHeights[rows - 1] : y,
     items
   };
 }
@@ -3600,6 +3653,53 @@ function truncateTextToWidth(context, text, maxWidth) {
   return `${result}…`;
 }
 
+/* SNSのアドレス：入りきらない時は「…」で切らずに折り返して最後まで見せる（最大3行）。
+   カードは画像なので、見た人が読んで入力・検索できるよう、IDの最後まで出すことを優先する */
+function wrapTextByChars(context, text, width, maxLines) {
+  const chars = Array.from(text);
+  const lines = [];
+  let current = "";
+  for (let index = 0; index < chars.length; index += 1) {
+    const next = current + chars[index];
+    if (current && context.measureText(next).width > width) {
+      if (lines.length === maxLines - 1) {
+        lines.push(truncateTextToWidth(context, current + chars.slice(index).join(""), width));
+        return lines;
+      }
+      lines.push(current);
+      current = chars[index];
+    } else {
+      current = next;
+    }
+  }
+  if (current) {
+    lines.push(current);
+  }
+  return lines;
+}
+
+/* 折り返す時は、行の長さがそろうように分ける（2行目に1文字だけ残る、を防ぐ） */
+function wrapTextBalanced(context, text, width, maxLines) {
+  const lines = wrapTextByChars(context, text, width, maxLines);
+  if (lines.length < 2) {
+    return lines;
+  }
+  const fullWidth = context.measureText(text).width;
+  const target = Math.min(width, fullWidth / lines.length + context.measureText("あ").width);
+  const balanced = wrapTextByChars(context, text, target, maxLines);
+  return balanced.length === lines.length ? balanced : lines;
+}
+
+function layoutAddressRow(context, link, width, scale = 1) {
+  const address = formatSocialAddress(link.url, 120);
+  const fontSize = fitSingleLineFont(context, address, 20 * scale, 13 * scale, width, "body");
+  context.font = getCanvasFont(fontSize, 600, "body");
+  const lines = context.measureText(address).width > width ? wrapTextBalanced(context, address, width, 3) : [address];
+  const lineHeight = Math.round(fontSize * 1.25);
+  const top = 20 * scale;
+  return { fontSize, lines, lineHeight, top, height: top + (lines.length - 1) * lineHeight + fontSize };
+}
+
 function drawAddressRow(context, link, x, y, width, accent, labelText, scale = 1) {
   const label = clampText(labelText || "URL", 14);
 
@@ -3609,53 +3709,75 @@ function drawAddressRow(context, link, x, y, width, accent, labelText, scale = 1
   context.font = getCanvasFont(13 * scale, 800, "label");
   context.fillText(label, x, y);
 
-  const address = formatSocialAddress(link.url, 60);
-  const addressFontSize = fitSingleLineFont(context, address, 20 * scale, 13 * scale, width, "body");
-  context.font = getCanvasFont(addressFontSize, 600, "body");
-  const displayAddress = truncateTextToWidth(context, address, width);
-
+  const layout = layoutAddressRow(context, link, width, scale);
+  context.font = getCanvasFont(layout.fontSize, 600, "body");
   context.fillStyle = hexToRgba(accent, 0.94);
-  context.fillText(displayAddress, x, y + 20 * scale);
+  layout.lines.forEach((line, lineIndex) => {
+    context.fillText(line, x, y + layout.top + lineIndex * layout.lineHeight);
+  });
+  return layout.height;
 }
 
+/* 基本情報（性・血液型・誕生日など）のチップ。
+   長い時は、まず文字を小さくして（元の75%まで）1行に収め、それでも入りきらなければ折り返す（最大3行）。「…」では切らない */
 function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor, scale = 1) {
   const tagHeight = 46 * scale;
   const horizontalGap = 10;
   const verticalGap = 8 * scale;
   const paddingX = 15 * scale;
+  const baseFont = 20 * scale;
+  const minFont = baseFont * 0.75;
   let cursorX = x;
   let cursorY = y;
+  let rowHeight = tagHeight;
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.font = getCanvasFont(20 * scale, 700, "body");
 
   const hotspotItems = [];
 
   items.forEach((item) => {
     const label = `${item.label}：`;
     const rawValue = String(item.value || "").trim();
-    const labelWidth = context.measureText(label).width;
     const maxTextWidth = Math.max(maxWidth - paddingX * 2, 20);
-    const value = labelWidth + context.measureText(rawValue).width > maxTextWidth
-      ? truncateTextToWidth(context, rawValue, Math.max(maxTextWidth - labelWidth, 10))
-      : rawValue;
-    const width = Math.min(labelWidth + context.measureText(value).width + paddingX * 2, maxWidth);
+
+    context.font = getCanvasFont(baseFont, 700, "body");
+    const naturalWidth = context.measureText(label + rawValue).width;
+    let fontSize = baseFont;
+    let lines = [rawValue];
+    if (naturalWidth > maxTextWidth) {
+      fontSize = Math.max(baseFont * (maxTextWidth / naturalWidth), minFont);
+      context.font = getCanvasFont(fontSize, 700, "body");
+      if (context.measureText(label + rawValue).width > maxTextWidth) {
+        lines = wrapTextBalanced(context, rawValue, Math.max(maxTextWidth - context.measureText(label).width, 20), 3);
+      }
+    }
+    context.font = getCanvasFont(fontSize, 700, "body");
+    const labelWidth = context.measureText(label).width;
+    const lineHeight = Math.round(fontSize * 1.3);
+    const valueWidth = Math.max(...lines.map((line) => context.measureText(line).width));
+    const width = Math.min(labelWidth + valueWidth + paddingX * 2, maxWidth);
+    const height = tagHeight + (lines.length - 1) * lineHeight;
 
     if (cursorX + width > x + maxWidth) {
       cursorX = x;
-      cursorY += tagHeight + verticalGap;
+      cursorY += rowHeight + verticalGap;
+      rowHeight = tagHeight;
     }
+    rowHeight = Math.max(rowHeight, height);
 
-    context.fillStyle = getAccentFill(context, cursorX, cursorY, width, tagHeight, 0.1, 0.16);
-    roundRect(context, cursorX, cursorY, width, tagHeight, 18);
+    context.fillStyle = getAccentFill(context, cursorX, cursorY, width, height, 0.1, 0.16);
+    roundRect(context, cursorX, cursorY, width, height, 18);
     context.fill();
 
     const textX = cursorX + paddingX;
+    const firstLineY = cursorY + tagHeight / 2 + 1;
     context.fillStyle = hexToRgba(getLabelTextColor(), 0.84);
-    context.fillText(label, textX, cursorY + tagHeight / 2 + 1);
+    context.fillText(label, textX, firstLineY);
     context.fillStyle = textColor;
-    context.fillText(value, textX + labelWidth, cursorY + tagHeight / 2 + 1);
+    lines.forEach((line, lineIndex) => {
+      context.fillText(line, textX + labelWidth, firstLineY + lineIndex * lineHeight);
+    });
 
     hotspotItems.push({
       type: "focus",
@@ -3664,7 +3786,7 @@ function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor, scale =
       x: cursorX,
       y: cursorY,
       width,
-      height: tagHeight,
+      height,
       radius: 18
     });
 
@@ -3672,7 +3794,7 @@ function drawMetaInfo(context, items, x, y, maxWidth, accent, textColor, scale =
   });
 
   return {
-    bottom: cursorY + tagHeight,
+    bottom: cursorY + rowHeight,
     items: hotspotItems
   };
 }
@@ -3833,17 +3955,18 @@ function getAdaptiveGridBoxes(items, x, y, width, height, gap, columns = 2) {
     ? clampShares(rowItems.map((row) => row.reduce((sum, item) => sum + weightOf(item), 0)), 0.6 / rows, 1.4 / rows)
     : [1];
   const usableHeight = Math.max(height - gap * (rows - 1), 10 * rows);
-  const usableWidth = Math.max(width - gap * (columns - 1), 10 * columns);
   const boxes = [];
   let cursorY = y;
   rowItems.forEach((row, rowIndex) => {
     const rowHeight = Math.max(usableHeight * rowShares[rowIndex], 10);
-    const colShares = row.length === columns
-      ? clampShares(row.map(weightOf), 0.7 / columns, 1.3 / columns)
-      : row.map(() => 1 / columns);
+    /* 未入力の枠は出さないので、段の中の枠が1つだけの時は横いっぱいに使う */
+    const rowUsableWidth = Math.max(width - gap * (row.length - 1), 10 * row.length);
+    const colShares = row.length > 1
+      ? clampShares(row.map(weightOf), 0.7 / row.length, 1.3 / row.length)
+      : [1];
     let cursorX = x;
     row.forEach((item, colIndex) => {
-      const boxWidth = Math.max(usableWidth * colShares[colIndex], 10);
+      const boxWidth = Math.max(rowUsableWidth * colShares[colIndex], 10);
       boxes.push({ x: cursorX, y: cursorY, w: boxWidth, h: rowHeight });
       cursorX += boxWidth + gap;
     });

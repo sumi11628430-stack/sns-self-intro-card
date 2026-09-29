@@ -1907,3 +1907,17 @@ body.oshi-page::before { background-image: url("./images/themes/oshi.webp"); }
 @media (min-width: 761px) {
   .hero > .hero-illust { width: auto; max-width: clamp(240px, 28vw, 430px); max-height: 380px; }
 }
+
+/* 表示倍率を上げた時のカードを見る窓（mobile-preview.js）：窓の中で上下左右に動かせる */
+.canvas-scroller { position: relative; }
+.canvas-scroller.is-zoomed {
+  overflow: auto;
+  cursor: grab;
+  border-radius: calc(var(--radius-xl) - 14px);
+  -webkit-overflow-scrolling: touch;
+}
+.canvas-scroller.is-dragging { cursor: grabbing; user-select: none; }
+.canvas-scroller.is-dragging * { cursor: grabbing !important; }
+@media (min-width: 1121px) {
+  .preview-frame > .canvas-scroller { order: -1; margin-bottom: 10px; }
+}
