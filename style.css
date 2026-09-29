@@ -1941,3 +1941,11 @@ body.oshi-page::before { background-image: url("./images/themes/oshi.webp"); }
 }
 .haroka-shell-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 1200; background: #fbf5e8; }
 .haroka-shell-open body { overflow: hidden; }
+
+/* チェックリストの「その他」自由入力欄 */
+.check-group .check-custom { margin-top: 10px; }
+.check-group .check-custom > span { font-size: 0.78rem; }
+/* 下のボタン列の「ページの先頭へ」（トップへ戻る・画像で保存と同じ形の横並び） */
+.page-bottom-actions .scroll-top-link {
+  flex-direction: row; min-height: 0; text-decoration: none; display: inline-flex; align-items: center;
+}

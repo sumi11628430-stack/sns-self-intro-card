@@ -50,6 +50,28 @@ const defaultState = {
   item3Value: "朝の時間がいちばん元気です",
   item4Label: "ひとこと",
   item4Value: "のんびり仲良くできたらうれしいです",
+  checkSilentFollow: false,
+  checkFollowBack: false,
+  checkReplyWelcome: false,
+  checkDmWelcome: false,
+  checkCallOk: false,
+  checkCasualOk: false,
+  checkSlowReply: false,
+  checkCustomDailyTalk: "",
+  checkMorning: false,
+  checkNight: false,
+  checkWeekday: false,
+  checkWeekend: false,
+  checkWorker: false,
+  checkStudent: false,
+  checkRemoteWork: false,
+  checkParenting: false,
+  checkCustomDailyLife: "",
+  checkNoRepost: false,
+  checkScreenshotOk: false,
+  checkNoPolitics: false,
+  checkSpoilerCare: false,
+  checkCustomDailyCare: "",
   socialX: "",
   socialXLabel: "X",
   socialInstagram: "",
@@ -485,7 +507,45 @@ function migrateLegacySocialFields(currentState) {
 
 const qrImageCache = new Map();
 
-const checklistGroups = [];
+const checklistGroups = [
+  {
+    title: "交流スタンス",
+    customKey: "checkCustomDailyTalk",
+    items: [
+      { key: "checkSilentFollow", label: "無言フォローOK" },
+      { key: "checkFollowBack", label: "フォロバします" },
+      { key: "checkReplyWelcome", label: "リプ歓迎" },
+      { key: "checkDmWelcome", label: "DM歓迎" },
+      { key: "checkCallOk", label: "通話OK" },
+      { key: "checkCasualOk", label: "呼びタメOK" },
+      { key: "checkSlowReply", label: "ゆっくり返信" }
+    ]
+  },
+  {
+    title: "生活・ペース",
+    customKey: "checkCustomDailyLife",
+    items: [
+      { key: "checkMorning", label: "朝型" },
+      { key: "checkNight", label: "夜型" },
+      { key: "checkWeekday", label: "平日浮上" },
+      { key: "checkWeekend", label: "週末浮上" },
+      { key: "checkWorker", label: "社会人" },
+      { key: "checkStudent", label: "学生" },
+      { key: "checkRemoteWork", label: "在宅ワーク" },
+      { key: "checkParenting", label: "子育て中" }
+    ]
+  },
+  {
+    title: "お願い・配慮",
+    customKey: "checkCustomDailyCare",
+    items: [
+      { key: "checkNoRepost", label: "無断転載NG" },
+      { key: "checkScreenshotOk", label: "スクショOK" },
+      { key: "checkNoPolitics", label: "政治・宗教の話は控えめ" },
+      { key: "checkSpoilerCare", label: "ネタバレ注意" }
+    ]
+  }
+];
 
 const form = document.getElementById("cardForm");
 const canvas = document.getElementById("cardCanvas");
@@ -590,7 +650,7 @@ const previewAdjustTargets = {
     offsetXKey: "avatarOffsetX",
     offsetYKey: "avatarOffsetY",
     minScale: 70,
-    maxScale: 180
+    maxScale: 300 /* 顔だけを大きく切り取れるよう、プロフィール画像は300%まで */
   }
 };
 
@@ -1049,6 +1109,11 @@ function loadSample() {
     intro: "カフェ巡りや読書、写真が好きです。ゆっくりペースですが、日常の話を気軽にできたらうれしいです。",
     tags: "カフェ巡り, 読書, 写真, ものづくり",
     footerMessage: "のんびり仲良くしてください",
+    checkReplyWelcome: true,
+    checkSlowReply: true,
+    checkNight: true,
+    checkWorker: true,
+    checkNoRepost: true,
     layoutMode: "standard",
     sizePreset: state.sizePreset || defaultState.sizePreset, /* 入力例を入れても、今選んでいるサイズのまま */
     themePreset: "sunrise",
@@ -1142,7 +1207,7 @@ function loadState() {
     );
     parsedState.backgroundFrontScale = normalizeTransformScale(parsedState.backgroundFrontScale, 100, 60, 180);
     parsedState.backgroundBackScale = normalizeTransformScale(parsedState.backgroundBackScale, 100, 60, 180);
-    parsedState.avatarScale = normalizeTransformScale(parsedState.avatarScale, 100, 70, 180);
+    parsedState.avatarScale = normalizeTransformScale(parsedState.avatarScale, 100, 70, 300);
     parsedState.backgroundFrontOffsetX = normalizeTransformOffset(parsedState.backgroundFrontOffsetX);
     parsedState.backgroundFrontOffsetY = normalizeTransformOffset(parsedState.backgroundFrontOffsetY);
     parsedState.backgroundBackOffsetX = normalizeTransformOffset(parsedState.backgroundBackOffsetX);
@@ -2191,29 +2256,47 @@ function renderStandardCard() {
   const hasFooterMessage = Boolean(String(state.footerMessage || "").trim());
   const footerHeight = hasFooterMessage ? canvas.height * 0.065 : 0;
   const footerTop = inner.y + inner.h - footerHeight;
-  let sectionBottomWithChecklist = tagsBottom;
+  const gridBottomGap = hasFooterMessage ? canvas.width * 0.03 : 0;
+  let gridTop = tagsBottom + canvas.width * 0.026;
+  let gridWidth = inner.w;
   if (checklistItems.length) {
     const checklistTop = tagsBottom + canvas.width * 0.026;
     const checklistFieldName = checklistGroups[0]?.items[0]?.key || "checkSameWelcome";
-    /* 選んだ項目が少ない時は文字を大きく。ただし下の4つの枠の高さ（最低限）は残す */
-    const minGridHeight = canvas.width * 0.22;
+    /* 選んだ項目が少ない時は文字を大きく。ただし下の4つの枠の高さ（最低限）は残す。
+       等倍でも残らない時は、チェックリストを右、4つの枠を左に横並びにする（枠がつぶれるのを防ぐ） */
+    const minGridHeight = oshiItems.length ? canvas.width * 0.22 : 0;
     const preferredScale = getChecklistPreferredScale(checklistItems);
-    let checklistScale = 1;
-    for (let scale = preferredScale; scale > 1.001; scale -= 0.05) {
+    let checklistScale = 0;
+    for (let scale = preferredScale; scale >= 0.999; scale -= 0.05) {
       const bottom = checklistTop + measureChecklistPanelScaled(checklistItems, inner.w, accent, text, checklistFieldName, scale);
-      if (footerTop - (hasFooterMessage ? canvas.width * 0.03 : 0) - (bottom + canvas.width * 0.026) >= minGridHeight) {
+      if (footerTop - gridBottomGap - (bottom + canvas.width * 0.026) >= minGridHeight) {
         checklistScale = scale;
         break;
       }
     }
-    const checklistLayout = drawChecklistPanelScaled(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, checklistScale);
-    sectionBottomWithChecklist = checklistLayout.bottom;
-    focusItems.push(...checklistLayout.items);
+    if (checklistScale) {
+      const checklistLayout = drawChecklistPanelScaled(ctx, checklistItems, inner.x, checklistTop, inner.w, accent, text, checklistFieldName, checklistScale);
+      focusItems.push(...checklistLayout.items);
+      gridTop = checklistLayout.bottom + canvas.width * 0.026;
+    } else {
+      const columnGap = canvas.width * 0.016;
+      const checklistWidth = inner.w * 0.44;
+      const availableHeight = footerTop - gridBottomGap - checklistTop;
+      let sideScale = 0.45;
+      for (let scale = preferredScale; scale >= 0.45; scale -= 0.05) {
+        if (measureChecklistPanelScaled(checklistItems, checklistWidth, accent, text, checklistFieldName, scale) <= availableHeight) {
+          sideScale = scale;
+          break;
+        }
+      }
+      const checklistLayout = drawChecklistPanelScaled(ctx, checklistItems, inner.x + inner.w - checklistWidth, checklistTop, checklistWidth, accent, text, checklistFieldName, sideScale);
+      focusItems.push(...checklistLayout.items);
+      gridWidth = inner.w - checklistWidth - columnGap;
+      gridTop = checklistTop + canvas.width * 0.012;
+    }
   }
-  const gridTop = sectionBottomWithChecklist + canvas.width * 0.026;
-  const gridBottomGap = hasFooterMessage ? canvas.width * 0.03 : 0;
   const gridHeight = Math.max(footerTop - gridBottomGap - gridTop, 0);
-  const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, inner.x, gridTop, inner.w, gridHeight, accent, text);
+  const oshiGridLayout = drawOshiItemGrid(ctx, oshiItems, inner.x, gridTop, gridWidth, gridHeight, accent, text);
   focusItems.push(...oshiGridLayout.items);
   if (hasFooterMessage) {
     const footerLayout = drawFooter(ctx, state.footerMessage, inner.x, footerTop, inner.w, footerHeight, accent, text);
@@ -2474,9 +2557,47 @@ function drawBusinessBack(context, box, oshiItems, checklistItems, accent, textC
   const footerTop = hasFooterMessage ? box.y + box.h - 68 : box.y + box.h - 18;
   const contentTop = inner.y + 6;
   const contentHeight = Math.max(footerTop - contentTop - 12, 180);
+  const splitGap = 16;
+  /* チェックの数が少ない時は、チェック欄を細くして左の枠を広く使い、チェックの文字は大きくする */
+  const checkCount = checklistItems.reduce((sum, group) => sum + ((group && group.items) ? group.items.length : 0), 0);
+  const leftShare = checkCount <= 3 ? 0.7 : checkCount <= 6 ? 0.63 : checkCount <= 9 ? 0.58 : 0.54;
+  /* 未入力の側は出さず、もう一方を横いっぱいに使う */
+  const showGrid = oshiItems.length > 0;
+  const showChecklist = checklistItems.length > 0;
+  const leftWidth = !showChecklist ? inner.w : inner.w * leftShare;
+  const rightWidth = !showGrid ? inner.w : inner.w - leftWidth - splitGap;
   const focusItems = [];
-  const oshiLayout = drawBusinessOshiGrid(context, oshiItems, inner.x, contentTop, inner.w, contentHeight, accent, textColor);
-  focusItems.push(...oshiLayout.items);
+
+  if (showGrid) {
+    const oshiLayout = drawBusinessOshiGrid(context, oshiItems, inner.x, contentTop, leftWidth, contentHeight, accent, textColor);
+    focusItems.push(...oshiLayout.items);
+  }
+  const checklistX = showGrid ? inner.x + leftWidth + splitGap : inner.x;
+  if (showChecklist) {
+    const checklistScale = getChecklistPreferredScale(checklistItems);
+    context.save();
+    context.translate(checklistX, contentTop);
+    context.scale(checklistScale, checklistScale);
+    const checklistLayout = drawBusinessChecklistPanel(
+      context,
+      checklistItems,
+      0,
+      0,
+      rightWidth / checklistScale,
+      contentHeight / checklistScale,
+      accent,
+      textColor,
+      checklistGroups[0]?.items[0]?.key || "checkSameWelcome"
+    );
+    context.restore();
+    focusItems.push(...checklistLayout.items.map((item) => ({
+      ...item,
+      x: checklistX + item.x * checklistScale,
+      y: contentTop + item.y * checklistScale,
+      width: item.width * checklistScale,
+      height: item.height * checklistScale
+    })));
+  }
   if (hasFooterMessage) {
     const footerLayout = drawBusinessFooterBand(context, state.footerMessage, inner.x, footerTop, inner.w, 40, accent, textColor);
     focusItems.push(footerLayout.item);
@@ -4006,6 +4127,16 @@ function collectOshiItems() {
   ];
 }
 
+/* 「その他」欄の自由入力を、「、」「,」「改行」で区切って札にする（1つ20文字・8個まで） */
+function parseCustomChecks(value) {
+  return String(value || "")
+    .split(/[、,，\n]/)
+    .map((text) => text.trim())
+    .filter(Boolean)
+    .slice(0, 8)
+    .map((text) => clampText(text, 20));
+}
+
 function collectChecklistItems() {
   return checklistGroups
     .map((group) => ({
@@ -4013,6 +4144,7 @@ function collectChecklistItems() {
       items: group.items
         .filter((item) => Boolean(state[item.key]))
         .map((item) => item.label)
+        .concat(parseCustomChecks(state[group.customKey]))
     }))
     .filter((group) => group.items.length);
 }
@@ -4681,7 +4813,7 @@ function getBusinessBackgroundTransformState(side = "front", currentState = stat
 
 function getAvatarTransformState(currentState = state) {
   return {
-    scale: normalizeTransformScale(currentState.avatarScale, 100, 70, 180),
+    scale: normalizeTransformScale(currentState.avatarScale, 100, 70, 300),
     offsetX: normalizeTransformOffset(currentState.avatarOffsetX),
     offsetY: normalizeTransformOffset(currentState.avatarOffsetY)
   };
@@ -4773,7 +4905,7 @@ function drawImageToBox(context, image, box, options = {}) {
     offsetX = 0,
     offsetY = 0
   } = options;
-  const userScale = normalizeTransformScale(scalePercent, 100, 20, 240) / 100;
+  const userScale = normalizeTransformScale(scalePercent, 100, 20, 300) / 100;
   const baseScale = fitMode === "contain"
     ? Math.min(box.w / image.width, box.h / image.height)
     : Math.max(box.w / image.width, box.h / image.height);

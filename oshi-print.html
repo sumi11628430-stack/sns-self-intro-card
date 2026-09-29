@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>推し活用 印刷して使える名刺</title>
-  <link rel="stylesheet" href="./style.css?v=20260929b">
+  <link rel="stylesheet" href="./style.css?v=20260929e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&family=Shippori+Mincho:wght@400;700&family=DotGothic16&family=Noto+Serif+JP:wght@400;700&family=RocknRoll+One&family=Rampart+One&family=Klee+One:wght@400;600&family=Stick&family=Dela+Gothic+One&family=Yusei+Magic&family=Hachi+Maru+Pop&family=Kaisei+Decol:wght@400;700&family=Mochiy+Pop+One&family=Reggae+One&display=swap">
@@ -204,14 +204,20 @@
               <section class="check-group">
                 <h3>交流スタンス</h3>
                 <div class="checklist-grid">
-                  <label class="check-option"><input id="checkSameWelcome" name="checkSameWelcome" type="checkbox"><span>同担歓迎</span></label>
-                  <label class="check-option"><input id="checkSameCareful" name="checkSameCareful" type="checkbox"><span>同担慎重</span></label>
+                  <label class="check-option"><input id="checkSameWelcome" name="checkSameWelcome" type="checkbox" data-exclusive="doutan"><span>同担歓迎</span></label>
+                  <label class="check-option"><input id="checkSameCareful" name="checkSameCareful" type="checkbox" data-exclusive="doutan"><span>同担慎重</span></label>
+                  <label class="check-option"><input id="checkSameRefuse" name="checkSameRefuse" type="checkbox" data-exclusive="doutan"><span>同担拒否</span></label>
                   <label class="check-option"><input id="checkOtherWelcome" name="checkOtherWelcome" type="checkbox"><span>他担歓迎</span></label>
                   <label class="check-option"><input id="checkCallOk" name="checkCallOk" type="checkbox"><span>通話OK</span></label>
                   <label class="check-option"><input id="checkDmOk" name="checkDmOk" type="checkbox"><span>DM歓迎</span></label>
                   <label class="check-option"><input id="checkSlowReply" name="checkSlowReply" type="checkbox"><span>ゆっくり返信</span></label>
-                  <label class="check-option"><input id="checkCasualTalk" name="checkCasualTalk" type="checkbox"><span>雑談OK</span></label>
+                  <label class="check-option"><input id="checkCasualTalk" name="checkCasualTalk" type="checkbox"><span>呼びタメOK</span></label>
+                  <label class="check-option"><input id="checkSilentFollow" name="checkSilentFollow" type="checkbox"><span>無言フォローOK</span></label>
+                  <label class="check-option"><input id="checkReplyWelcome" name="checkReplyWelcome" type="checkbox"><span>リプ歓迎</span></label>
+                  <label class="check-option"><input id="checkCompanion" name="checkCompanion" type="checkbox"><span>同行者募集</span></label>
+                  <label class="check-option"><input id="checkTradeOk" name="checkTradeOk" type="checkbox"><span>交換・譲渡OK</span></label>
                 </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomOshiTalk" name="checkCustomOshiTalk" type="text" maxlength="60" placeholder="例：お気軽にリプください"></label>
               </section>
 
               <section class="check-group">
@@ -224,7 +230,14 @@
                   <label class="check-option"><input id="checkItaBag" name="checkItaBag" type="checkbox"><span>痛バ</span></label>
                   <label class="check-option"><input id="checkCosplay" name="checkCosplay" type="checkbox"><span>コスプレ</span></label>
                   <label class="check-option"><input id="checkHandmade" name="checkHandmade" type="checkbox"><span>ハンドメイド</span></label>
+                  <label class="check-option"><input id="checkExpedition" name="checkExpedition" type="checkbox"><span>遠征民</span></label>
+                  <label class="check-option"><input id="checkPilgrimage" name="checkPilgrimage" type="checkbox"><span>聖地巡礼</span></label>
+                  <label class="check-option"><input id="checkAltar" name="checkAltar" type="checkbox"><span>祭壇づくり</span></label>
+                  <label class="check-option"><input id="checkOshiColor" name="checkOshiColor" type="checkbox"><span>推し色コーデ</span></label>
+                  <label class="check-option"><input id="checkAnalysis" name="checkAnalysis" type="checkbox"><span>考察勢</span></label>
+                  <label class="check-option"><input id="checkCreation" name="checkCreation" type="checkbox"><span>創作（絵・文字）</span></label>
                 </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomOshiStyle" name="checkCustomOshiStyle" type="text" maxlength="60" placeholder="例：誕生日にケーキを用意"></label>
               </section>
 
               <section class="check-group">
@@ -236,9 +249,14 @@
                   <label class="check-option"><input id="checkSpoilerOk" name="checkSpoilerOk" type="checkbox"><span>ネタバレOK</span></label>
                   <label class="check-option"><input id="checkFujoshiOk" name="checkFujoshiOk" type="checkbox"><span>腐向けOK</span></label>
                   <label class="check-option"><input id="checkYume" name="checkYume" type="checkbox"><span>夢思考あり</span></label>
-                  <label class="check-option"><input id="checkMultiFandom" name="checkMultiFandom" type="checkbox"><span>多界隈</span></label>
-                  <label class="check-option"><input id="checkNewFan" name="checkNewFan" type="checkbox"><span>新規ファン</span></label>
+                  <label class="check-option"><input id="checkMultiFandom" name="checkMultiFandom" type="checkbox"><span>雑多垢</span></label>
+                  <label class="check-option"><input id="checkNewFan" name="checkNewFan" type="checkbox" data-exclusive="fanHistory"><span>新規ファン</span></label>
+                  <label class="check-option"><input id="checkVeteran" name="checkVeteran" type="checkbox" data-exclusive="fanHistory"><span>古参</span></label>
+                  <label class="check-option"><input id="checkAdult" name="checkAdult" type="checkbox"><span>成人済み</span></label>
+                  <label class="check-option"><input id="checkOmnivore" name="checkOmnivore" type="checkbox"><span>雑食</span></label>
+                  <label class="check-option"><input id="checkLandmine" name="checkLandmine" type="checkbox"><span>地雷あり</span></label>
                 </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomOshiLike" name="checkCustomOshiLike" type="text" maxlength="60" placeholder="例：箱のわちゃわちゃが好き"></label>
               </section>
             </div>
 
@@ -501,23 +519,19 @@
 
     <div class="hero-actions page-bottom-actions">
       <button type="button" class="ghost" onclick="location.href='./index.html'">トップへ戻る</button>
+      <a class="ghost scroll-top-link" href="#top">⇧ ページの先頭へ</a>
       <button type="button" class="primary" id="downloadCardBottom">画像で保存</button>
-    </div>
-    <div class="page-corner-actions">
-      <a class="ghost scroll-top-link" href="#" aria-label="ページの先頭へ戻る">
-        <span class="scroll-top-symbol" aria-hidden="true">⇪</span>
-        <span class="scroll-top-caption">ページの先頭へ戻る</span>
-      </a>
     </div>
   <p style="margin:36px 0 6px;text-align:center;font-size:0.72rem;letter-spacing:0.04em;color:var(--muted,#617175);">Uniter-presents © 2025 A.T.L / 繋がりプロジェクト</p>
   </div>
   <script src="./common-profile.js?v=20260709w"></script>
-  <script src="./oshi-script.js?v=20260929b"></script>
+  <script src="./oshi-script.js?v=20260929e"></script>
   <script src="./style-popover.js?v=20260927b"></script>
   <script src="./theme-picker.js?v=20260927c"></script>
   <script src="./avatar-shape-picker.js?v=20260927a"></script>
   <script src="./mobile-preview.js?v=20260928a"></script>
   <script src="./image-direct.js?v=20260929a"></script>
   <script src="./haroka-bgm.js?v=20260929d"></script>
+  <script src="./checklist-extras.js?v=20260929a"></script>
 </body>
 </html>

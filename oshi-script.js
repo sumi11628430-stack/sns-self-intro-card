@@ -68,6 +68,24 @@ const defaultState = {
   checkYume: false,
   checkMultiFandom: true,
   checkNewFan: false,
+  checkSameRefuse: false,
+  checkSilentFollow: false,
+  checkReplyWelcome: false,
+  checkCompanion: false,
+  checkTradeOk: false,
+  checkCustomOshiTalk: "",
+  checkExpedition: false,
+  checkPilgrimage: false,
+  checkAltar: false,
+  checkOshiColor: false,
+  checkAnalysis: false,
+  checkCreation: false,
+  checkCustomOshiStyle: "",
+  checkVeteran: false,
+  checkAdult: false,
+  checkOmnivore: false,
+  checkLandmine: false,
+  checkCustomOshiLike: "",
   socialX: "",
   socialXLabel: "X",
   socialInstagram: "",
@@ -473,18 +491,25 @@ const qrImageCache = new Map();
 const checklistGroups = [
   {
     title: "交流スタンス",
+    customKey: "checkCustomOshiTalk",
     items: [
       { key: "checkSameWelcome", label: "同担歓迎" },
       { key: "checkSameCareful", label: "同担慎重" },
+      { key: "checkSameRefuse", label: "同担拒否" },
       { key: "checkOtherWelcome", label: "他担歓迎" },
       { key: "checkCallOk", label: "通話OK" },
       { key: "checkDmOk", label: "DM歓迎" },
       { key: "checkSlowReply", label: "ゆっくり返信" },
-      { key: "checkCasualTalk", label: "呼びタメOK" }
+      { key: "checkCasualTalk", label: "呼びタメOK" },
+      { key: "checkSilentFollow", label: "無言フォローOK" },
+      { key: "checkReplyWelcome", label: "リプ歓迎" },
+      { key: "checkCompanion", label: "同行者募集" },
+      { key: "checkTradeOk", label: "交換・譲渡OK" }
     ]
   },
   {
     title: "推し活スタイル",
+    customKey: "checkCustomOshiStyle",
     items: [
       { key: "checkOnsite", label: "現場参戦" },
       { key: "checkStreaming", label: "配信視聴" },
@@ -492,11 +517,18 @@ const checklistGroups = [
       { key: "checkNuiPhoto", label: "ぬい撮り" },
       { key: "checkItaBag", label: "痛バ" },
       { key: "checkCosplay", label: "コスプレ" },
-      { key: "checkHandmade", label: "ハンドメイド" }
+      { key: "checkHandmade", label: "ハンドメイド" },
+      { key: "checkExpedition", label: "遠征民" },
+      { key: "checkPilgrimage", label: "聖地巡礼" },
+      { key: "checkAltar", label: "祭壇づくり" },
+      { key: "checkOshiColor", label: "推し色コーデ" },
+      { key: "checkAnalysis", label: "考察勢" },
+      { key: "checkCreation", label: "創作（絵・文字）" }
     ]
   },
   {
     title: "好み・スタンス",
+    customKey: "checkCustomOshiLike",
     items: [
       { key: "checkSingleOshi", label: "単推し" },
       { key: "checkGroupOshi", label: "箱推し" },
@@ -505,7 +537,11 @@ const checklistGroups = [
       { key: "checkFujoshiOk", label: "腐向けOK" },
       { key: "checkYume", label: "夢思考あり" },
       { key: "checkMultiFandom", label: "雑多垢" },
-      { key: "checkNewFan", label: "新規ファン" }
+      { key: "checkNewFan", label: "新規ファン" },
+      { key: "checkVeteran", label: "古参" },
+      { key: "checkAdult", label: "成人済み" },
+      { key: "checkOmnivore", label: "雑食" },
+      { key: "checkLandmine", label: "地雷あり" }
     ]
   }
 ];
@@ -613,7 +649,7 @@ const previewAdjustTargets = {
     offsetXKey: "avatarOffsetX",
     offsetYKey: "avatarOffsetY",
     minScale: 70,
-    maxScale: 180
+    maxScale: 300 /* 顔だけを大きく切り取れるよう、プロフィール画像は300%まで */
   }
 };
 
@@ -1183,7 +1219,7 @@ function loadState() {
     );
     parsedState.backgroundFrontScale = normalizeTransformScale(parsedState.backgroundFrontScale, 100, 60, 180);
     parsedState.backgroundBackScale = normalizeTransformScale(parsedState.backgroundBackScale, 100, 60, 180);
-    parsedState.avatarScale = normalizeTransformScale(parsedState.avatarScale, 100, 70, 180);
+    parsedState.avatarScale = normalizeTransformScale(parsedState.avatarScale, 100, 70, 300);
     parsedState.backgroundFrontOffsetX = normalizeTransformOffset(parsedState.backgroundFrontOffsetX);
     parsedState.backgroundFrontOffsetY = normalizeTransformOffset(parsedState.backgroundFrontOffsetY);
     parsedState.backgroundBackOffsetX = normalizeTransformOffset(parsedState.backgroundBackOffsetX);
@@ -2265,10 +2301,10 @@ function renderStandardCard() {
     const columnGap = canvas.width * 0.016;
     const checklistWidth = inner.w * 0.44;
     const checklistX = inner.x + inner.w - checklistWidth;
-    /* 右の列に入りきらない時は、チェックリストを少しずつ縮めて（最小60%）ひとことの帯の上に収める */
+    /* 右の列に入りきらない時は、チェックリストを少しずつ縮めて（最小45%）ひとことの帯の上に収める */
     const availableHeight = footerTop - gridBottomGap - checklistTop;
     let checklistScale = 1;
-    for (let scale = preferredChecklistScale; scale >= 0.6; scale -= 0.05) {
+    for (let scale = preferredChecklistScale; scale >= 0.45; scale -= 0.05) {
       checklistScale = scale;
       const naturalHeight = drawChecklistPanel(
         getScratchContext(), checklistItems, 0, 0, checklistWidth / scale, accent, text, checklistFieldName
@@ -4135,6 +4171,16 @@ function collectOshiItems() {
   ];
 }
 
+/* 「その他」欄の自由入力を、「、」「,」「改行」で区切って札にする（1つ20文字・8個まで） */
+function parseCustomChecks(value) {
+  return String(value || "")
+    .split(/[、,，\n]/)
+    .map((text) => text.trim())
+    .filter(Boolean)
+    .slice(0, 8)
+    .map((text) => clampText(text, 20));
+}
+
 function collectChecklistItems() {
   return checklistGroups
     .map((group) => ({
@@ -4142,6 +4188,7 @@ function collectChecklistItems() {
       items: group.items
         .filter((item) => Boolean(state[item.key]))
         .map((item) => item.label)
+        .concat(parseCustomChecks(state[group.customKey]))
     }))
     .filter((group) => group.items.length);
 }
@@ -4827,7 +4874,7 @@ function getBusinessBackgroundTransformState(side = "front", currentState = stat
 
 function getAvatarTransformState(currentState = state) {
   return {
-    scale: normalizeTransformScale(currentState.avatarScale, 100, 70, 180),
+    scale: normalizeTransformScale(currentState.avatarScale, 100, 70, 300),
     offsetX: normalizeTransformOffset(currentState.avatarOffsetX),
     offsetY: normalizeTransformOffset(currentState.avatarOffsetY)
   };
@@ -4919,7 +4966,7 @@ function drawImageToBox(context, image, box, options = {}) {
     offsetX = 0,
     offsetY = 0
   } = options;
-  const userScale = normalizeTransformScale(scalePercent, 100, 20, 240) / 100;
+  const userScale = normalizeTransformScale(scalePercent, 100, 20, 300) / 100;
   const baseScale = fitMode === "contain"
     ? Math.min(box.w / image.width, box.h / image.height)
     : Math.max(box.w / image.width, box.h / image.height);

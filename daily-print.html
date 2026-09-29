@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>日常用 印刷して使える名刺</title>
-  <link rel="stylesheet" href="./style.css?v=20260929b">
+  <link rel="stylesheet" href="./style.css?v=20260929e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&family=Shippori+Mincho:wght@400;700&family=DotGothic16&family=Noto+Serif+JP:wght@400;700&family=RocknRoll+One&family=Rampart+One&family=Klee+One:wght@400;600&family=Stick&family=Dela+Gothic+One&family=Yusei+Magic&family=Hachi+Maru+Pop&family=Kaisei+Decol:wght@400;700&family=Mochiy+Pop+One&family=Reggae+One&display=swap">
@@ -214,6 +214,54 @@
 
           <section class="panel">
             <div class="panel-header">
+              <h2>チェックリスト</h2>
+              <p>当てはまるものだけ選ぶと、名刺の裏面に見やすく整理されます。</p>
+            </div>
+            <div class="checklist-sections">
+              <section class="check-group">
+                <h3>交流スタンス</h3>
+                <div class="checklist-grid">
+                  <label class="check-option"><input id="checkSilentFollow" name="checkSilentFollow" type="checkbox"><span>無言フォローOK</span></label>
+                  <label class="check-option"><input id="checkFollowBack" name="checkFollowBack" type="checkbox"><span>フォロバします</span></label>
+                  <label class="check-option"><input id="checkReplyWelcome" name="checkReplyWelcome" type="checkbox"><span>リプ歓迎</span></label>
+                  <label class="check-option"><input id="checkDmWelcome" name="checkDmWelcome" type="checkbox"><span>DM歓迎</span></label>
+                  <label class="check-option"><input id="checkCallOk" name="checkCallOk" type="checkbox"><span>通話OK</span></label>
+                  <label class="check-option"><input id="checkCasualOk" name="checkCasualOk" type="checkbox"><span>呼びタメOK</span></label>
+                  <label class="check-option"><input id="checkSlowReply" name="checkSlowReply" type="checkbox"><span>ゆっくり返信</span></label>
+                </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomDailyTalk" name="checkCustomDailyTalk" type="text" maxlength="60" placeholder="例：絵文字多め、夜はお休み"></label>
+              </section>
+
+              <section class="check-group">
+                <h3>生活・ペース</h3>
+                <div class="checklist-grid">
+                  <label class="check-option"><input id="checkMorning" name="checkMorning" type="checkbox" data-exclusive="dayRhythm"><span>朝型</span></label>
+                  <label class="check-option"><input id="checkNight" name="checkNight" type="checkbox" data-exclusive="dayRhythm"><span>夜型</span></label>
+                  <label class="check-option"><input id="checkWeekday" name="checkWeekday" type="checkbox"><span>平日浮上</span></label>
+                  <label class="check-option"><input id="checkWeekend" name="checkWeekend" type="checkbox"><span>週末浮上</span></label>
+                  <label class="check-option"><input id="checkWorker" name="checkWorker" type="checkbox"><span>社会人</span></label>
+                  <label class="check-option"><input id="checkStudent" name="checkStudent" type="checkbox"><span>学生</span></label>
+                  <label class="check-option"><input id="checkRemoteWork" name="checkRemoteWork" type="checkbox"><span>在宅ワーク</span></label>
+                  <label class="check-option"><input id="checkParenting" name="checkParenting" type="checkbox"><span>子育て中</span></label>
+                </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomDailyLife" name="checkCustomDailyLife" type="text" maxlength="60" placeholder="例：シフト勤務、ペットと暮らしてます"></label>
+              </section>
+
+              <section class="check-group">
+                <h3>お願い・配慮</h3>
+                <div class="checklist-grid">
+                  <label class="check-option"><input id="checkNoRepost" name="checkNoRepost" type="checkbox"><span>無断転載NG</span></label>
+                  <label class="check-option"><input id="checkScreenshotOk" name="checkScreenshotOk" type="checkbox"><span>スクショOK</span></label>
+                  <label class="check-option"><input id="checkNoPolitics" name="checkNoPolitics" type="checkbox"><span>政治・宗教の話は控えめ</span></label>
+                  <label class="check-option"><input id="checkSpoilerCare" name="checkSpoilerCare" type="checkbox"><span>ネタバレ注意</span></label>
+                </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomDailyCare" name="checkCustomDailyCare" type="text" maxlength="60" placeholder="例：アイコンの無断使用NG"></label>
+              </section>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
               <h2>デザイン</h2>
               <p>印刷用名刺の見た目をここで整えます。</p>
             </div>
@@ -414,23 +462,19 @@
 
     <div class="hero-actions page-bottom-actions">
       <button type="button" class="ghost" onclick="location.href='./index.html'">トップへ戻る</button>
+      <a class="ghost scroll-top-link" href="#top">⇧ ページの先頭へ</a>
       <button type="button" class="primary" id="downloadCardBottom">画像で保存</button>
-    </div>
-    <div class="page-corner-actions">
-      <a class="ghost scroll-top-link" href="#" aria-label="ページの先頭へ戻る">
-        <span class="scroll-top-symbol" aria-hidden="true">⇪</span>
-        <span class="scroll-top-caption">ページの先頭へ戻る</span>
-      </a>
     </div>
   <p style="margin:36px 0 6px;text-align:center;font-size:0.72rem;letter-spacing:0.04em;color:var(--muted,#617175);">Uniter-presents © 2025 A.T.L / 繋がりプロジェクト</p>
   </div>
   <script src="./common-profile.js?v=20260709w"></script>
-  <script src="./script.js?v=20260929b"></script>
+  <script src="./script.js?v=20260929f"></script>
   <script src="./style-popover.js?v=20260927b"></script>
   <script src="./theme-picker.js?v=20260927c"></script>
   <script src="./avatar-shape-picker.js?v=20260927a"></script>
   <script src="./mobile-preview.js?v=20260928a"></script>
   <script src="./image-direct.js?v=20260929a"></script>
   <script src="./haroka-bgm.js?v=20260929d"></script>
+  <script src="./checklist-extras.js?v=20260929a"></script>
 </body>
 </html>

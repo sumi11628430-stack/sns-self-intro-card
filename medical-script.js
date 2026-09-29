@@ -69,6 +69,22 @@ const defaultState = {
   checkEmploymentTransition: false,
   checkDisabilityEmployment: false,
   checkHelper: false,
+  checkInTreatment: false,
+  checkObservation: false,
+  checkPostSurgery: false,
+  checkRemission: false,
+  checkReturnPrep: false,
+  checkCustomMedState: "",
+  checkSmellSensitive: false,
+  checkCrowdHard: false,
+  checkIrregular: false,
+  checkReadOnlyOk: false,
+  checkIllnessTalkOk: false,
+  checkIllnessTalkLess: false,
+  checkCustomMedCare: "",
+  checkHelpMark: false,
+  checkEmploymentSupport: false,
+  checkCustomMedSupport: "",
   socialX: "",
   socialXLabel: "X",
   socialInstagram: "",
@@ -507,6 +523,7 @@ const qrImageCache = new Map();
 const checklistGroups = [
   {
     title: "療養・状態",
+    customKey: "checkCustomMedState",
     items: [
       { key: "checkOutpatient", label: "通院中" },
       { key: "checkHospitalized", label: "入院中" },
@@ -514,11 +531,17 @@ const checklistGroups = [
       { key: "checkLeaveWork", label: "休職中" },
       { key: "checkLeaveSchool", label: "休学中" },
       { key: "checkMedication", label: "服薬中" },
-      { key: "checkCounseling", label: "カウンセリング中" }
+      { key: "checkCounseling", label: "カウンセリング中" },
+      { key: "checkInTreatment", label: "治療中" },
+      { key: "checkObservation", label: "経過観察中" },
+      { key: "checkPostSurgery", label: "術後" },
+      { key: "checkRemission", label: "寛解" },
+      { key: "checkReturnPrep", label: "復職準備中" }
     ]
   },
   {
     title: "配慮・センシティブ",
+    customKey: "checkCustomMedCare",
     items: [
       { key: "checkSensorySensitive", label: "感覚過敏" },
       { key: "checkVisualSensitive", label: "視覚過敏" },
@@ -527,11 +550,18 @@ const checklistGroups = [
       { key: "checkFlashback", label: "フラッシュバック" },
       { key: "checkPhoneHard", label: "通話苦手" },
       { key: "checkSlowReply", label: "返信ゆっくり" },
-      { key: "checkOd", label: "OD" }
+      { key: "checkOd", label: "OD" },
+      { key: "checkSmellSensitive", label: "嗅覚過敏" },
+      { key: "checkCrowdHard", label: "人混み苦手" },
+      { key: "checkIrregular", label: "浮上不定期" },
+      { key: "checkReadOnlyOk", label: "既読だけでもOK" },
+      { key: "checkIllnessTalkOk", label: "病気の話OK" },
+      { key: "checkIllnessTalkLess", label: "病気の話は控えめ" }
     ]
   },
   {
     title: "福祉・支援",
+    customKey: "checkCustomMedSupport",
     items: [
       { key: "checkDisabilityCard", label: "障害者手帳" },
       { key: "checkDisabilityPension", label: "障害年金" },
@@ -540,7 +570,9 @@ const checklistGroups = [
       { key: "checkDayCare", label: "デイケア" },
       { key: "checkEmploymentTransition", label: "就労移行支援" },
       { key: "checkDisabilityEmployment", label: "障害者雇用" },
-      { key: "checkHelper", label: "要ヘルパー" }
+      { key: "checkHelper", label: "要ヘルパー" },
+      { key: "checkHelpMark", label: "ヘルプマーク" },
+      { key: "checkEmploymentSupport", label: "就労継続支援" }
     ]
   }
 ];
@@ -648,7 +680,7 @@ const previewAdjustTargets = {
     offsetXKey: "avatarOffsetX",
     offsetYKey: "avatarOffsetY",
     minScale: 70,
-    maxScale: 180
+    maxScale: 300 /* 顔だけを大きく切り取れるよう、プロフィール画像は300%まで */
   }
 };
 
@@ -1219,7 +1251,7 @@ function loadState() {
     );
     parsedState.backgroundFrontScale = normalizeTransformScale(parsedState.backgroundFrontScale, 100, 60, 180);
     parsedState.backgroundBackScale = normalizeTransformScale(parsedState.backgroundBackScale, 100, 60, 180);
-    parsedState.avatarScale = normalizeTransformScale(parsedState.avatarScale, 100, 70, 180);
+    parsedState.avatarScale = normalizeTransformScale(parsedState.avatarScale, 100, 70, 300);
     parsedState.backgroundFrontOffsetX = normalizeTransformOffset(parsedState.backgroundFrontOffsetX);
     parsedState.backgroundFrontOffsetY = normalizeTransformOffset(parsedState.backgroundFrontOffsetY);
     parsedState.backgroundBackOffsetX = normalizeTransformOffset(parsedState.backgroundBackOffsetX);
@@ -4143,6 +4175,16 @@ function collectOshiItems() {
   ];
 }
 
+/* 「その他」欄の自由入力を、「、」「,」「改行」で区切って札にする（1つ20文字・8個まで） */
+function parseCustomChecks(value) {
+  return String(value || "")
+    .split(/[、,，\n]/)
+    .map((text) => text.trim())
+    .filter(Boolean)
+    .slice(0, 8)
+    .map((text) => clampText(text, 20));
+}
+
 function collectChecklistItems() {
   return checklistGroups
     .map((group) => ({
@@ -4150,6 +4192,7 @@ function collectChecklistItems() {
       items: group.items
         .filter((item) => Boolean(state[item.key]))
         .map((item) => item.label)
+        .concat(parseCustomChecks(state[group.customKey]))
     }))
     .filter((group) => group.items.length);
 }
@@ -4818,7 +4861,7 @@ function getBusinessBackgroundTransformState(side = "front", currentState = stat
 
 function getAvatarTransformState(currentState = state) {
   return {
-    scale: normalizeTransformScale(currentState.avatarScale, 100, 70, 180),
+    scale: normalizeTransformScale(currentState.avatarScale, 100, 70, 300),
     offsetX: normalizeTransformOffset(currentState.avatarOffsetX),
     offsetY: normalizeTransformOffset(currentState.avatarOffsetY)
   };
@@ -4910,7 +4953,7 @@ function drawImageToBox(context, image, box, options = {}) {
     offsetX = 0,
     offsetY = 0
   } = options;
-  const userScale = normalizeTransformScale(scalePercent, 100, 20, 240) / 100;
+  const userScale = normalizeTransformScale(scalePercent, 100, 20, 300) / 100;
   const baseScale = fitMode === "contain"
     ? Math.min(box.w / image.width, box.h / image.height)
     : Math.max(box.w / image.width, box.h / image.height);

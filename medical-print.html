@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>闘病用 印刷して使える名刺</title>
-  <link rel="stylesheet" href="./style.css?v=20260929b">
+  <link rel="stylesheet" href="./style.css?v=20260929e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&family=Shippori+Mincho:wght@400;700&family=DotGothic16&family=Noto+Serif+JP:wght@400;700&family=RocknRoll+One&family=Rampart+One&family=Klee+One:wght@400;600&family=Stick&family=Dela+Gothic+One&family=Yusei+Magic&family=Hachi+Maru+Pop&family=Kaisei+Decol:wght@400;700&family=Mochiy+Pop+One&family=Reggae+One&display=swap">
@@ -200,8 +200,15 @@
                   <label class="check-option"><input id="checkLeaveSchool" name="checkLeaveSchool" type="checkbox"><span>休学中</span></label>
                   <label class="check-option"><input id="checkMedication" name="checkMedication" type="checkbox"><span>服薬中</span></label>
                   <label class="check-option"><input id="checkCounseling" name="checkCounseling" type="checkbox"><span>カウンセリング中</span></label>
+                  <label class="check-option"><input id="checkInTreatment" name="checkInTreatment" type="checkbox"><span>治療中</span></label>
+                  <label class="check-option"><input id="checkObservation" name="checkObservation" type="checkbox"><span>経過観察中</span></label>
+                  <label class="check-option"><input id="checkPostSurgery" name="checkPostSurgery" type="checkbox"><span>術後</span></label>
+                  <label class="check-option"><input id="checkRemission" name="checkRemission" type="checkbox"><span>寛解</span></label>
+                  <label class="check-option"><input id="checkReturnPrep" name="checkReturnPrep" type="checkbox"><span>復職準備中</span></label>
                 </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomMedState" name="checkCustomMedState" type="text" maxlength="60" placeholder="例：季節の変わり目に不調"></label>
               </section>
+
               <section class="check-group">
                 <h3>配慮・センシティブ</h3>
                 <div class="checklist-grid">
@@ -213,8 +220,16 @@
                   <label class="check-option"><input id="checkPhoneHard" name="checkPhoneHard" type="checkbox"><span>通話苦手</span></label>
                   <label class="check-option"><input id="checkSlowReply" name="checkSlowReply" type="checkbox"><span>返信ゆっくり</span></label>
                   <label class="check-option"><input id="checkOd" name="checkOd" type="checkbox"><span>OD</span></label>
+                  <label class="check-option"><input id="checkSmellSensitive" name="checkSmellSensitive" type="checkbox"><span>嗅覚過敏</span></label>
+                  <label class="check-option"><input id="checkCrowdHard" name="checkCrowdHard" type="checkbox"><span>人混み苦手</span></label>
+                  <label class="check-option"><input id="checkIrregular" name="checkIrregular" type="checkbox"><span>浮上不定期</span></label>
+                  <label class="check-option"><input id="checkReadOnlyOk" name="checkReadOnlyOk" type="checkbox"><span>既読だけでもOK</span></label>
+                  <label class="check-option"><input id="checkIllnessTalkOk" name="checkIllnessTalkOk" type="checkbox" data-exclusive="illnessTalk"><span>病気の話OK</span></label>
+                  <label class="check-option"><input id="checkIllnessTalkLess" name="checkIllnessTalkLess" type="checkbox" data-exclusive="illnessTalk"><span>病気の話は控えめ</span></label>
                 </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomMedCare" name="checkCustomMedCare" type="text" maxlength="60" placeholder="例：大きな音が苦手"></label>
               </section>
+
               <section class="check-group">
                 <h3>福祉・支援</h3>
                 <div class="checklist-grid">
@@ -226,7 +241,10 @@
                   <label class="check-option"><input id="checkEmploymentTransition" name="checkEmploymentTransition" type="checkbox"><span>就労移行支援</span></label>
                   <label class="check-option"><input id="checkDisabilityEmployment" name="checkDisabilityEmployment" type="checkbox"><span>障害者雇用</span></label>
                   <label class="check-option"><input id="checkHelper" name="checkHelper" type="checkbox"><span>要ヘルパー</span></label>
+                  <label class="check-option"><input id="checkHelpMark" name="checkHelpMark" type="checkbox"><span>ヘルプマーク</span></label>
+                  <label class="check-option"><input id="checkEmploymentSupport" name="checkEmploymentSupport" type="checkbox"><span>就労継続支援</span></label>
                 </div>
+                <label class="field check-custom"><span>その他（自由に入力。「、」か「,」で区切ると別々の札になります）</span><input id="checkCustomMedSupport" name="checkCustomMedSupport" type="text" maxlength="60" placeholder="例：相談支援を利用中"></label>
               </section>
             </div>
             <label class="field">
@@ -442,23 +460,19 @@
 
     <div class="hero-actions page-bottom-actions">
       <button type="button" class="ghost" onclick="location.href='./index.html'">トップへ戻る</button>
+      <a class="ghost scroll-top-link" href="#top">⇧ ページの先頭へ</a>
       <button type="button" class="primary" id="downloadCardBottom">画像で保存</button>
-    </div>
-    <div class="page-corner-actions">
-      <a class="ghost scroll-top-link" href="#" aria-label="ページの先頭へ戻る">
-        <span class="scroll-top-symbol" aria-hidden="true">⇪</span>
-        <span class="scroll-top-caption">ページの先頭へ戻る</span>
-      </a>
     </div>
   <p style="margin:36px 0 6px;text-align:center;font-size:0.72rem;letter-spacing:0.04em;color:var(--muted,#617175);">Uniter-presents © 2025 A.T.L / 繋がりプロジェクト</p>
   </div>
   <script src="./common-profile.js?v=20260709w"></script>
-  <script src="./medical-script.js?v=20260929b"></script>
+  <script src="./medical-script.js?v=20260929d"></script>
   <script src="./style-popover.js?v=20260927b"></script>
   <script src="./theme-picker.js?v=20260927c"></script>
   <script src="./avatar-shape-picker.js?v=20260927a"></script>
   <script src="./mobile-preview.js?v=20260928a"></script>
   <script src="./image-direct.js?v=20260929a"></script>
   <script src="./haroka-bgm.js?v=20260929d"></script>
+  <script src="./checklist-extras.js?v=20260929a"></script>
 </body>
 </html>
