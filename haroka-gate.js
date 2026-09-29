@@ -47,6 +47,11 @@
       sessionStorage.setItem("haroka_gate_seen", "1");
     } catch (e) {}
 
+    /* 押した操作の中で、歌を流す準備をしておく（ドミソが鳴り終わって3秒後に「小さな出会い」） */
+    if (window.__harokaBgm) {
+      window.__harokaBgm.unlock();
+      window.__harokaBgm.startSong(5300);
+    }
     const ac = getAudio();
     const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     gate.classList.add("is-leaving");

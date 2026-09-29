@@ -1924,3 +1924,20 @@ body.oshi-page::before { background-image: url("./images/themes/oshi.webp"); }
 /* カードの上で画像をつかんで動かしている間（image-direct.js） */
 .is-image-dragging, .is-image-dragging * { cursor: grabbing !important; user-select: none; }
 .image-direct-note { margin-top: 6px; }
+
+/* ---- 音楽の♪ボタン（左下）と、カード作成のページを重ねて表示する画面（haroka-bgm.js） ---- */
+.bgm-toggle {
+  position: fixed; left: 14px; bottom: 14px; z-index: 1300;
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 2px solid #f1cf8e; background: rgba(255, 253, 247, 0.95); color: #e98a7a;
+  font-size: 1.15rem; line-height: 1; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(116, 80, 45, 0.2);
+}
+.bgm-toggle[hidden] { display: none; }
+.bgm-toggle.is-off { opacity: 0.6; }
+.bgm-toggle.is-off::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 24px; height: 2px; margin: -1px 0 0 -12px;
+  background: currentColor; transform: rotate(-45deg); border-radius: 2px;
+}
+.haroka-shell-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 1200; background: #fbf5e8; }
+.haroka-shell-open body { overflow: hidden; }
