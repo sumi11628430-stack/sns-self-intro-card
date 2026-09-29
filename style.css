@@ -1921,3 +1921,6 @@ body.oshi-page::before { background-image: url("./images/themes/oshi.webp"); }
 @media (min-width: 1121px) {
   .preview-frame > .canvas-scroller { order: -1; margin-bottom: 10px; }
 }
+/* カードの上で画像をつかんで動かしている間（image-direct.js） */
+.is-image-dragging, .is-image-dragging * { cursor: grabbing !important; user-select: none; }
+.image-direct-note { margin-top: 6px; }
