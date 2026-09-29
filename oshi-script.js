@@ -3028,6 +3028,14 @@ function drawBusinessOshiGrid(context, items, x, y, width, height, accent, textC
   const rows = 2;
   const boxes = getAdaptiveGridBoxes(items.slice(0, 4), x, y, width, height, gap, columns);
   const hotspotItems = [];
+  const bodyFontSize = getCommonGridBodyFont(context, items.slice(0, 4).map((item, index) => {
+    const { w: cardWidth, h: cardHeight } = boxes[index];
+    const textWidth = cardWidth - 32;
+    context.font = getCanvasFont(15, 700, "label");
+    const titleFontSize = fitSingleLineFont(context, clampText(item.label || "項目", 14), clamp(Math.floor(cardHeight * 0.17), 13, 15), 10, textWidth);
+    const bodyOffset = clamp(cardHeight * 0.11, 12, 15) + titleFontSize + clamp(cardHeight * 0.08, 6, 9);
+    return { text: String(item.value || "").trim() || "未入力", w: textWidth, h: Math.max(cardHeight - clamp(cardHeight * 0.12, 10, 14) - bodyOffset, 14) };
+  }), 24, 10);
 
   items.slice(0, 4).forEach((item, index) => {
     const { x: boxX, y: boxY, w: cardWidth, h: cardHeight } = boxes[index];
@@ -3061,26 +3069,8 @@ function drawBusinessOshiGrid(context, items, x, y, width, height, accent, textC
 
     const bodyTop = titleTop + titleFontSize + clamp(cardHeight * 0.08, 6, 9);
     const availableBodyHeight = Math.max(boxY + cardHeight - clamp(cardHeight * 0.12, 10, 14) - bodyTop, 14);
-    const bodyText = clampText(item.value || "", 48) || "未入力";
-    const bodyLayout = fitWrappedTextBlock(
-      context,
-      bodyText,
-      textWidth,
-      availableBodyHeight,
-      getAdaptiveTextLayout(bodyText, {
-        maxFontSize: clamp(Math.floor(cardHeight * 0.23), 17, 22),
-        minFontSize: 13,
-        maxLines: 4,
-        maxExpandedFontSize: clamp(Math.floor(cardHeight * 0.3), 22, 28),
-        longTextThreshold: 40
-      })
-    );
-
-    context.fillStyle = textColor;
-    context.font = getCanvasFont(bodyLayout.fontSize, 600, "body");
-    bodyLayout.lines.forEach((line, lineIndex) => {
-      context.fillText(line, boxX + horizontalPadding, bodyTop + lineIndex * bodyLayout.lineHeight);
-    });
+    const bodyText = String(item.value || "").trim() || "未入力";
+    drawGridBodyText(context, bodyText, boxX + horizontalPadding, bodyTop, textWidth, availableBodyHeight, bodyFontSize, textColor);
 
     if (item.fieldName) {
       hotspotItems.push(makeFocusItem(item.fieldName, item.label || "項目", boxX, boxY, cardWidth, cardHeight, 22));
@@ -3377,8 +3367,10 @@ function drawRoleChip(context, labelText, text, x, y, maxWidth, accent, textColo
   };
 }
 
-function isPreviewVisible(value) {
-  return value !== "hide";
+/* 「表示／非表示」の選択はなくした（空の欄は自動で出さないため）。
+   以前「非表示」にして保存した欄も表示する。見せたくない欄は空にしてもらう */
+function isPreviewVisible() {
+  return true;
 }
 
 /* 未入力の欄はカードに出さない（見本の文字も出さず、その分の場所を他に使う） */
@@ -3931,6 +3923,43 @@ function drawChecklistPanel(context, groups, x, y, maxWidth, accent, textColor, 
 /* 4つの枠（自由項目・闘病メモ・推しプロフィール）の広さを、入力した文字の量に合わせて配分する。
    文章の多い段は高く、同じ段の中では文章の多い枠を広くする。
    極端にならないよう、段の高さは30〜70%、枠の幅は35〜65%の範囲に収める（未入力の枠は小さめ） */
+/* 4つの枠の本文は、同じ大きさの文字にそろえる。
+   どの枠にも全文が入る一番大きい大きさを探して、全部の枠で使う（下限でも入らない枠だけ、最後を「…」にする） */
+function getCommonGridBodyFont(context, areas, maxFont, floorFont) {
+  let size = maxFont;
+  areas.forEach((area) => {
+    while (size > floorFont) {
+      context.font = getCanvasFont(size, 600, "body");
+      const lineHeight = Math.max(Math.round(size * 1.16), size + 2);
+      if (wrapLines(context, area.text, area.w).length * lineHeight <= area.h) {
+        break;
+      }
+      size -= 1;
+    }
+  });
+  return size;
+}
+
+function drawGridBodyText(context, text, x, y, width, height, fontSize, textColor) {
+  context.font = getCanvasFont(fontSize, 600, "body");
+  const lineHeight = Math.max(Math.round(fontSize * 1.16), fontSize + 2);
+  let lines = wrapLines(context, text, width);
+  const maxLines = Math.max(1, Math.floor(height / lineHeight));
+  if (lines.length > maxLines) {
+    lines = lines.slice(0, maxLines);
+    let last = lines[maxLines - 1];
+    while (last.length > 1 && context.measureText(`${last}…`).width > width) {
+      last = last.slice(0, -1);
+    }
+    lines[maxLines - 1] = `${last}…`;
+  }
+  context.fillStyle = textColor;
+  context.textBaseline = "top";
+  lines.forEach((line, lineIndex) => {
+    context.fillText(line, x, y + lineIndex * lineHeight);
+  });
+}
+
 function getAdaptiveGridBoxes(items, x, y, width, height, gap, columns = 2) {
   const rows = Math.max(Math.ceil(items.length / columns), 1);
   const weightOf = (item) => {
@@ -4014,6 +4043,10 @@ function drawOshiItemGrid(context, items, x, y, width, height, accent, textColor
   const rows = Math.ceil(items.length / columns);
   const boxes = getAdaptiveGridBoxes(items, x, y, width, height, gap, columns);
   const hotspotItems = [];
+  const bodyFontSize = getCommonGridBodyFont(context, items.map((item, index) => {
+    const { w: cardWidth, h: cardHeight } = boxes[index];
+    return { text: String(item.value || "").trim() || "未入力", w: cardWidth - 36, h: Math.max(cardHeight - 16, 14) };
+  }), 28, 11);
 
   items.forEach((item, index) => {
     const { x: boxX, y: boxY, w: cardWidth, h: cardHeight } = boxes[index];
@@ -4052,27 +4085,8 @@ function drawOshiItemGrid(context, items, x, y, width, height, accent, textColor
     const bodyTop = boxY + 10;
     const bottomPadding = 6;
     const availableBodyHeight = Math.max(boxY + cardHeight - bottomPadding - bodyTop, 14);
-    const bodyText = clampText(item.value || "", 220) || "未入力";
-    const bodyLayout = fitWrappedTextBlock(
-      context,
-      bodyText,
-      textWidth,
-      availableBodyHeight,
-      getAdaptiveTextLayout(bodyText, {
-        maxFontSize: clamp(Math.floor(cardHeight * 0.23), 18, 24),
-        minFontSize: 12,
-        maxLines: 10,
-        maxExpandedFontSize: clamp(Math.floor(cardHeight * 0.28), 22, 28),
-        longTextThreshold: 28,
-        maxExtraLines: 3
-      })
-    );
-
-    context.fillStyle = textColor;
-    context.font = getCanvasFont(bodyLayout.fontSize, 600, "body");
-    bodyLayout.lines.forEach((line, lineIndex) => {
-      context.fillText(line, boxX + horizontalPadding, bodyTop + lineIndex * bodyLayout.lineHeight);
-    });
+    const bodyText = String(item.value || "").trim() || "未入力";
+    drawGridBodyText(context, bodyText, boxX + horizontalPadding, bodyTop, textWidth, availableBodyHeight, bodyFontSize, textColor);
 
     if (item.fieldName) {
       hotspotItems.push(makeFocusItem(item.fieldName, item.label || "項目", boxX, boxY, cardWidth, cardHeight, 28));
